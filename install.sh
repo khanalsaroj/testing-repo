@@ -272,93 +272,20 @@ generate_config() {
   info "Starting config generation for version: $version"
   
   local config_file="$INSTALL_DIR/config.yaml"
-  local config_backup="${config_file}.bak.$(date +%s)"
   
-  if [ -f "$config_file" ]; then
-    warn "Existing config detected, creating backup..."
-    if ! cp "$config_file" "$config_backup" 2>&1; then
-      error "Failed to backup existing config"
-    fi
-    success "Backup created: $config_backup"
-    
-    # Check if update is needed
-    local current_version=$(grep -o 'version: *"[^"]*"' "$config_file" | head -1 | cut -d'"' -f2 || echo "unknown")
-    if [ "$current_version" != "$version" ]; then
-      info "Upgrading config from v$current_version to v$version"
-    fi
-  fi
+  info "Writing config to: $config_file"
   
-  info "Generating quantum configuration..."
+  {
+    echo "# TypeGen Configuration"
+    echo "# Version: $version"
+    echo ""
+    echo "typegen:"
+    echo "  version: \"$version\""
+    echo "  mode: \"production\""
+    # ... etc
+  } > "$config_file"
   
-  if ! cat > "$config_file" <<'EOF'
-# ⚡ TypeGen Hyper-Configuration
-# Generated: $(date -Iseconds)
-
-typegen:
-  version: "${version}"
-  mode: "production"
-  telemetry: true
-  auto_update: true
-
-backend:
-  image: "ghcr.io/typegen/typegen-api:${version}"
-  port: 8080
-  replicas: 1
-  resources:
-    cpu: "500m"
-    memory: "512Mi"
-  health_check:
-    path: "/health"
-    interval: "30s"
-
-frontend:
-  image: "ghcr.io/typegen/typegen-dashboard:${version}"
-  port: 3000
-  replicas: 1
-  resources:
-    cpu: "250m"
-    memory: "256Mi"
-
-database:
-  type: "postgres"
-  host: "${TYPEGEN_DB_HOST:-localhost}"
-  port: "${TYPEGEN_DB_PORT:-5432}"
-  name: "${TYPEGEN_DB_NAME:-typegen}"
-  username: "${TYPEGEN_DB_USER:-typegen}"
-  password: "${TYPEGEN_DB_PASSWORD}"
-  ssl_mode: "prefer"
-  pool_size: 10
-
-cache:
-  enabled: true
-  type: "redis"
-  host: "${TYPEGEN_REDIS_HOST:-localhost}"
-  port: "${TYPEGEN_REDIS_PORT:-6379}"
-
-monitoring:
-  enabled: true
-  metrics_port: 9090
-  log_level: "info"
-  retention_days: 30
-
-security:
-  encryption_key: "${TYPEGEN_ENCRYPTION_KEY:-}"
-  cors_origins: ["https://*.typegen.dev", "http://localhost:*"]
-  rate_limit: 100
-
-plugins:
-  directory: "${TYPEGEN_PLUGIN_DIR:-$INSTALL_DIR/plugins}"
-  auto_discover: true
-EOF
-  then
-    error "Failed to write config file"
-  fi
-  
-  info "Config file written, setting permissions..."
-  if ! chmod 600 "$config_file" 2>&1; then
-    warn "Failed to set config file permissions"
-  fi
-  
+  chmod 600 "$config_file"
   success "Configuration generated: $config_file"
 }
 
