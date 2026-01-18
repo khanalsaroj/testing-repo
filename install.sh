@@ -580,8 +580,14 @@ main() {
   info "Downloading: $download_url"
   info "📥 Downloading quantum binary..."
 
-  tar -xzf ${CTL_NAME}-${OS}-${ARCH}.tar.gz
   download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
+
+  # Extract archive
+  info "📦 Extracting binary..."
+  tar -xzf "$tmp_dir/$archive" -C "$tmp_dir"
+  
+  # Normalize binary name
+  mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
   
   # Verify binary
   verify_binary "$tmp_dir/$CTL_NAME"
