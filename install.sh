@@ -579,6 +579,8 @@ main() {
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
   info "Downloading: $download_url"
   info "📥 Downloading quantum binary..."
+
+  tar -xzf ${CTL_NAME}-${OS}-${ARCH}.tar.gz
   download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
   
   # Verify binary
