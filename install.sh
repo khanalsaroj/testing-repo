@@ -614,7 +614,9 @@ main() {
   if [ ! -f "$extracted_binary" ]; then
     error "Expected binary '${CTL_NAME}' not found in archive"
   fi
-  
+  info "📂 Extracted contents:"
+  find "$extract_dir" -maxdepth 2 -type f -print
+
   cp "$extracted_binary" "${tmp_dir}/${CTL_NAME}"
   chmod 755 "${tmp_dir}/${CTL_NAME}"
   
