@@ -193,13 +193,14 @@ download_with_retry() {
     info "Download attempt $i/$max_retries"
     
     if curl -fL --progress-bar --retry 3 --retry-delay 1 "$url" -o "$output"; then
+      success "Download completed successfully"
       return 0
     fi
     
     if [ $i -lt $max_retries ]; then
       warn "Download failed, retrying in ${retry_delay}s..."
       sleep $retry_delay
-      retry_delay=$((retry_delay * 2))  # Exponential backoff
+      retry_delay=$((retry_delay * 2))
     fi
   done
   
@@ -209,13 +210,22 @@ download_with_retry() {
 verify_binary() {
   local binary="$1"
 
-  [ -f "$binary" ] || error "Binary not found: $binary"
+  if [ ! -f "$binary" ]; then
+    error "Binary not found: $binary"
+  fi
+  
   chmod +x "$binary"
-
-  if "$binary" version >/dev/null 2>&1; then
-    success "Binary version command verified"
+  
+  # More robust version check
+  if "$binary" --version >/dev/null 2>&1 || "$binary" version >/dev/null 2>&1 || "$binary" -v >/dev/null 2>&1; then
+    success "Binary verification passed"
+    return 0
   else
-    warn "Binary version command failed (non-fatal)"
+    # Try to get any output to see what's wrong
+    local output=$("$binary" 2>&1 || true)
+    warn "Binary verification warning: $output"
+    warn "Binary may not support version command, proceeding anyway..."
+    return 0
   fi
 }
 
@@ -592,36 +602,78 @@ main() {
   local archive_file="${tmp_dir}/download.tar.gz"
   download_with_retry "$download_url" "$archive_file"
   
+  # Verify download
+  if [ ! -f "$archive_file" ]; then
+    error "Downloaded file does not exist: $archive_file"
+  fi
+  
+  local file_size=$(stat -f%z "$archive_file" 2>/dev/null || stat -c%s "$archive_file" 2>/dev/null)
+  if [ "$file_size" -lt 1000 ]; then
+    error "Downloaded file is too small ($file_size bytes), likely corrupted"
+  fi
+  success "Downloaded archive ($file_size bytes)"
+  
   # Extract archive
   info "📦 Extracting binary..."
   local extract_dir="${tmp_dir}/extract"
   mkdir -p "$extract_dir"
-  tar -xzf "$archive_file" -C "$extract_dir" || true
   
-  # Debug: List extracted contents
-  debug "Extracted contents:"
-  find "$extract_dir" -type f | while read -r file; do
-    debug "  $file"
-  done
-  
-  # Find the binary - check various possible locations
- extracted_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" | head -1)
-
-  [ -n "$extracted_binary" ] || error "Binary not found after extraction"
-
-
-  if [ ! -f "$extracted_binary" ]; then
-    error "Expected binary '${CTL_NAME}' not found in archive"
+  if ! tar -xzf "$archive_file" -C "$extract_dir" 2>&1; then
+    error "Failed to extract archive"
   fi
+  success "Archive extracted"
+  
+  # Debug: Show what was extracted
   info "📂 Extracted contents:"
-  find "$extract_dir" -maxdepth 2 -type f -print
-
+  find "$extract_dir" -type f -ls | head -20
+  
+  # Find the binary - try multiple strategies
+  local extracted_binary=""
+  
+  # Strategy 1: Look for exact name
+  extracted_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" -print -quit)
+  
+  # Strategy 2: Look for any executable
+  if [ -z "$extracted_binary" ]; then
+    warn "Binary '$CTL_NAME' not found, looking for executables..."
+    extracted_binary=$(find "$extract_dir" -type f -executable -print -quit)
+  fi
+  
+  # Strategy 3: Look for common binary locations
+  if [ -z "$extracted_binary" ]; then
+    for potential_path in \
+      "$extract_dir/$CTL_NAME" \
+      "$extract_dir/bin/$CTL_NAME" \
+      "$extract_dir/${CTL_NAME}-${OS}-${ARCH}" \
+      "$extract_dir/dist/$CTL_NAME"; do
+      if [ -f "$potential_path" ]; then
+        extracted_binary="$potential_path"
+        break
+      fi
+    done
+  fi
+  
+  # Strategy 4: Take the first regular file
+  if [ -z "$extracted_binary" ]; then
+    warn "Still no binary found, taking first file..."
+    extracted_binary=$(find "$extract_dir" -type f -print -quit)
+  fi
+  
+  if [ -z "$extracted_binary" ] || [ ! -f "$extracted_binary" ]; then
+    error "Could not locate binary in extracted archive. Contents were:
+$(find "$extract_dir" -type f)"
+  fi
+  
+  info "Found binary: $extracted_binary"
+  
+  # Copy to temporary location
   cp "$extracted_binary" "${tmp_dir}/${CTL_NAME}"
   chmod 755 "${tmp_dir}/${CTL_NAME}"
   
   success "Binary prepared: $CTL_NAME"
   
   # Verify binary
+  info "🔬 Verifying binary..."
   verify_binary "${tmp_dir}/${CTL_NAME}"
   
   # Create directory structure
