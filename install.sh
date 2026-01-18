@@ -245,37 +245,53 @@ create_directory_structure() {
   )
   
   for dir in "${dirs[@]}"; do
-    mkdir -p "$dir"
-    chmod 755 "$dir"
+    info "Creating directory: $dir"
+    if ! mkdir -p "$dir" 2>&1; then
+      error "Failed to create directory: $dir"
+    fi
+    
+    if ! chmod 755 "$dir" 2>&1; then
+      warn "Failed to set permissions on: $dir"
+    fi
+    
     debug "Created: $dir"
   done
   
   # Special permissions for sensitive directories
-  chmod 700 "$INSTALL_DIR/backups"
+  info "Setting special permissions on backups directory"
+  if ! chmod 700 "$INSTALL_DIR/backups" 2>&1; then
+    warn "Failed to set permissions on backups directory"
+  fi
+  
+  success "Directory structure created"
 }
+
 
 generate_config() {
   local version="$1"
+  info "Starting config generation for version: $version"
+  
   local config_file="$INSTALL_DIR/config.yaml"
   local config_backup="${config_file}.bak.$(date +%s)"
   
   if [ -f "$config_file" ]; then
     warn "Existing config detected, creating backup..."
-    cp "$config_file" "$config_backup"
+    if ! cp "$config_file" "$config_backup" 2>&1; then
+      error "Failed to backup existing config"
+    fi
     success "Backup created: $config_backup"
     
     # Check if update is needed
-    local current_version=$(grep -o 'version: *"[^"]*"' "$config_file" | head -1 | cut -d'"' -f2)
+    local current_version=$(grep -o 'version: *"[^"]*"' "$config_file" | head -1 | cut -d'"' -f2 || echo "unknown")
     if [ "$current_version" != "$version" ]; then
       info "Upgrading config from v$current_version to v$version"
-      # Here you could add migration logic
     fi
   fi
   
   info "Generating quantum configuration..."
   
-  cat > "$config_file" <<EOF
-# ⚡ TypeGen Hyper-Configuration v${version}
+  if ! cat > "$config_file" <<'EOF'
+# ⚡ TypeGen Hyper-Configuration
 # Generated: $(date -Iseconds)
 
 typegen:
@@ -305,19 +321,19 @@ frontend:
 
 database:
   type: "postgres"
-  host: "\${TYPEGEN_DB_HOST:-localhost}"
-  port: "\${TYPEGEN_DB_PORT:-5432}"
-  name: "\${TYPEGEN_DB_NAME:-typegen}"
-  username: "\${TYPEGEN_DB_USER:-typegen}"
-  password: "\${TYPEGEN_DB_PASSWORD}"
+  host: "${TYPEGEN_DB_HOST:-localhost}"
+  port: "${TYPEGEN_DB_PORT:-5432}"
+  name: "${TYPEGEN_DB_NAME:-typegen}"
+  username: "${TYPEGEN_DB_USER:-typegen}"
+  password: "${TYPEGEN_DB_PASSWORD}"
   ssl_mode: "prefer"
   pool_size: 10
 
 cache:
   enabled: true
   type: "redis"
-  host: "\${TYPEGEN_REDIS_HOST:-localhost}"
-  port: "\${TYPEGEN_REDIS_PORT:-6379}"
+  host: "${TYPEGEN_REDIS_HOST:-localhost}"
+  port: "${TYPEGEN_REDIS_PORT:-6379}"
 
 monitoring:
   enabled: true
@@ -326,17 +342,23 @@ monitoring:
   retention_days: 30
 
 security:
-  encryption_key: "\${TYPEGEN_ENCRYPTION_KEY:-}"
+  encryption_key: "${TYPEGEN_ENCRYPTION_KEY:-}"
   cors_origins: ["https://*.typegen.dev", "http://localhost:*"]
   rate_limit: 100
 
-# Plugin system
 plugins:
-  directory: "\${TYPEGEN_PLUGIN_DIR:-$INSTALL_DIR/plugins}"
+  directory: "${TYPEGEN_PLUGIN_DIR:-$INSTALL_DIR/plugins}"
   auto_discover: true
 EOF
+  then
+    error "Failed to write config file"
+  fi
   
-  chmod 600 "$config_file"
+  info "Config file written, setting permissions..."
+  if ! chmod 600 "$config_file" 2>&1; then
+    warn "Failed to set config file permissions"
+  fi
+  
   success "Configuration generated: $config_file"
 }
 
