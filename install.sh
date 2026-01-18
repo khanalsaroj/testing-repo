@@ -578,46 +578,29 @@ main() {
   # Download binary
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
   info "Downloading: $download_url"
+  
+  # Download the archive
   info "📥 Downloading quantum binary..."
-
-  download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
-  # Replace this section (around line 312):
-  info "📥 Downloading quantum binary..."
-  download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
+  local archive_file="${CTL_NAME}-${OS}-${ARCH}.tar.gz"
+  download_with_retry "$download_url" "$tmp_dir/$archive_file"
   
   # Extract archive
   info "📦 Extracting binary..."
-  tar -xzf "$tmp_dir/$archive" -C "$tmp_dir"
+  tar -xzf "$tmp_dir/$archive_file" -C "$tmp_dir"
   
-  # Normalize binary name
-  mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
-  
-  # With this:
-  info "📥 Downloading quantum binary..."
-  local archive_name="${CTL_NAME}-${OS}-${ARCH}.tar.gz"
-  download_with_retry "$download_url" "$tmp_dir/$archive_name"
-  
-  # Extract archive
-  info "📦 Extracting binary..."
-  tar -xzf "$tmp_dir/$archive_name" -C "$tmp_dir"
-  
-  # The binary might be in a subdirectory or have a different name
-  # Try to find and normalize it
-  local extracted_binary
+  # Normalize binary name - look for the extracted binary
   if [ -f "$tmp_dir/$CTL_NAME" ]; then
-      extracted_binary="$tmp_dir/$CTL_NAME"
+      # Binary is already extracted with correct name
+      true
   elif [ -f "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" ]; then
-      extracted_binary="$tmp_dir/${CTL_NAME}-${OS}-${ARCH}"
-      mv "$extracted_binary" "$tmp_dir/$CTL_NAME"
-      extracted_binary="$tmp_dir/$CTL_NAME"
+      mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
   else
-      # Try to find any executable file in the extracted directory
-      extracted_binary=$(find "$tmp_dir" -type f -executable | head -1)
-      if [ -n "$extracted_binary" ]; then
+      # Try to find any executable file
+      local extracted_binary=$(find "$tmp_dir" -maxdepth 1 -type f -name "$CTL_NAME*" | head -1)
+      if [ -n "$extracted_binary" ] && [ -x "$extracted_binary" ]; then
           mv "$extracted_binary" "$tmp_dir/$CTL_NAME"
-          extracted_binary="$tmp_dir/$CTL_NAME"
       else
-          error "Could not find binary in the extracted archive"
+          error "Could not find extracted binary in $tmp_dir"
       fi
   fi
   
