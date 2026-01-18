@@ -596,9 +596,10 @@ main() {
   info "📦 Extracting binary..."
   local extract_dir="${tmp_dir}/extract"
   mkdir -p "$extract_dir"
-  tar -xzf "$archive_file" -C "$extract_dir" || {
-  warn "tar exited with non-zero status; continuing (archive likely extracted)"
-  }
+  if ! tar -xzf "$archive_file" -C "$extract_dir"; then
+    warn "tar reported warnings; continuing with extracted files"
+  fi
+
 
   
   # Debug: List extracted contents
