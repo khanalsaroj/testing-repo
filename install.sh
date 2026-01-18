@@ -581,10 +581,45 @@ main() {
   info "📥 Downloading quantum binary..."
 
   download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
-
+  # Replace this section (around line 312):
+  info "📥 Downloading quantum binary..."
+  download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
+  
   # Extract archive
   info "📦 Extracting binary..."
   tar -xzf "$tmp_dir/$archive" -C "$tmp_dir"
+  
+  # Normalize binary name
+  mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
+  
+  # With this:
+  info "📥 Downloading quantum binary..."
+  local archive_name="${CTL_NAME}-${OS}-${ARCH}.tar.gz"
+  download_with_retry "$download_url" "$tmp_dir/$archive_name"
+  
+  # Extract archive
+  info "📦 Extracting binary..."
+  tar -xzf "$tmp_dir/$archive_name" -C "$tmp_dir"
+  
+  # The binary might be in a subdirectory or have a different name
+  # Try to find and normalize it
+  local extracted_binary
+  if [ -f "$tmp_dir/$CTL_NAME" ]; then
+      extracted_binary="$tmp_dir/$CTL_NAME"
+  elif [ -f "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" ]; then
+      extracted_binary="$tmp_dir/${CTL_NAME}-${OS}-${ARCH}"
+      mv "$extracted_binary" "$tmp_dir/$CTL_NAME"
+      extracted_binary="$tmp_dir/$CTL_NAME"
+  else
+      # Try to find any executable file in the extracted directory
+      extracted_binary=$(find "$tmp_dir" -type f -executable | head -1)
+      if [ -n "$extracted_binary" ]; then
+          mv "$extracted_binary" "$tmp_dir/$CTL_NAME"
+          extracted_binary="$tmp_dir/$CTL_NAME"
+      else
+          error "Could not find binary in the extracted archive"
+      fi
+  fi
   
   # Normalize binary name
   mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
