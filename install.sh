@@ -577,7 +577,7 @@ main() {
   
   # Download binary
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}"
-  info "Download URL: $download_url"
+  info "Downloading: $download_url"
   info "📥 Downloading quantum binary..."
   download_with_retry "$download_url" "$tmp_dir/$CTL_NAME"
   
