@@ -541,12 +541,27 @@ validate_installation() {
   fi
 }
 
+# -------- Cleanup Function --------
+cleanup() {
+    if [ -n "${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
+        rm -rf "$tmp_dir"
+        debug "Cleaned up temporary directory: $tmp_dir"
+    fi
+}
+
+# Set trap for cleanup
+trap cleanup EXIT INT TERM
+
 # -------- Main Cosmic Routine --------
 main() {
   show_banner
   
   info "🚀 Initializing TypeGen Quantum Installer"
   info "Build: $(date -Iseconds) | PID: $$"
+  
+  # Initialize temporary directory
+  tmp_dir=$(mktemp -d -t typegen-install-XXXXXX)
+  info "Using temporary directory: $tmp_dir"
   
   # Prerequisite checks
   check_bash_version
@@ -570,42 +585,50 @@ main() {
   version=$(resolve_version) || error "Version resolution failed"
   info "Target version: v$version"
   
-  # Prepare installation
-  local tmp_dir
-  tmp_dir=$(mktemp -d -t typegen-install-XXXXXX)
-  trap 'rm -rf "$tmp_dir"' EXIT INT TERM
-  
-  # Download binary
+  # Download and extract binary
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
-  info "Downloading: $download_url"
-  
-  # Download the archive
   info "📥 Downloading quantum binary..."
-  local archive_file="${CTL_NAME}-${OS}-${ARCH}.tar.gz"
-  download_with_retry "$download_url" "$tmp_dir/$archive_file"
   
-  # Extract archive
+  # Create temporary directory for extraction
+  local extract_dir="$tmp_dir/extract"
+  mkdir -p "$extract_dir"
+  
+  # Download and extract
+  download_with_retry "$download_url" "$tmp_dir/download.tar.gz"
   info "📦 Extracting binary..."
-  tar -xzf "$tmp_dir/$archive_file" -C "$tmp_dir"
+  tar -xzf "$tmp_dir/download.tar.gz" -C "$extract_dir"
   
-  # Normalize binary name - look for the extracted binary
-  if [ -f "$tmp_dir/$CTL_NAME" ]; then
-      # Binary is already extracted with correct name
-      true
-  elif [ -f "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" ]; then
-      mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
-  else
-      # Try to find any executable file
-      local extracted_binary=$(find "$tmp_dir" -maxdepth 1 -type f -name "$CTL_NAME*" | head -1)
-      if [ -n "$extracted_binary" ] && [ -x "$extracted_binary" ]; then
-          mv "$extracted_binary" "$tmp_dir/$CTL_NAME"
-      else
-          error "Could not find extracted binary in $tmp_dir"
-      fi
+  # Find and move the binary - handle different possible locations
+  info "🔧 Preparing binary..."
+  local found_binary=""
+  
+  # Look for binary in common locations
+  possible_paths=(
+    "$extract_dir/$CTL_NAME"
+    "$extract_dir/${CTL_NAME}-${OS}-${ARCH}"
+    "$extract_dir/${CTL_NAME}-${OS}-${ARCH}/$CTL_NAME"
+    "$extract_dir/bin/$CTL_NAME"
+    "$extract_dir/usr/local/bin/$CTL_NAME"
+  )
+  
+  for path in "${possible_paths[@]}"; do
+    if [ -f "$path" ]; then
+      found_binary="$path"
+      break
+    fi
+  done
+  
+  # If not found, search recursively
+  if [ -z "$found_binary" ]; then
+    found_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" -o -name "$CTL_NAME-*" | head -1)
   fi
   
-  # Normalize binary name
-  mv "$tmp_dir/${CTL_NAME}-${OS}-${ARCH}" "$tmp_dir/$CTL_NAME"
+  if [ -n "$found_binary" ] && [ -f "$found_binary" ]; then
+    mv "$found_binary" "$tmp_dir/$CTL_NAME"
+    success "Binary found and prepared"
+  else
+    error "Could not locate binary in the downloaded archive"
+  fi
   
   # Verify binary
   verify_binary "$tmp_dir/$CTL_NAME"
