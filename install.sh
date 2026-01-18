@@ -208,22 +208,17 @@ download_with_retry() {
 
 verify_binary() {
   local binary="$1"
-  
-  # File existence check
+
   [ -f "$binary" ] || error "Binary not found: $binary"
-  
-  # Executable check
-  [ -x "$binary" ] || {
-    chmod +x "$binary" || error "Cannot make binary executable"
-  }
-  
-  # Basic validation by running help command
-  if "$binary" --help >/dev/null 2>&1; then
-    success "Binary integrity verified"
+  chmod +x "$binary"
+
+  if "$binary" version >/dev/null 2>&1; then
+    success "Binary version command verified"
   else
-    warn "Binary help command failed (non-fatal)"
+    warn "Binary version command failed (non-fatal)"
   fi
 }
+
 
 # -------- Cosmic Installation --------
 create_directory_structure() {
@@ -610,33 +605,16 @@ main() {
   done
   
   # Find the binary - check various possible locations
-  info "🔧 Preparing binary..."
-  local found_binary=""
-  
-  # First, try to find any executable file
-  found_binary=$(find "$extract_dir" -type f -executable 2>/dev/null | head -1)
-  
-  # If no executable found, look for files with common names
-  if [ -z "$found_binary" ]; then
-    found_binary=$(find "$extract_dir" -type f \( -name "$CTL_NAME" -o -name "*$CTL_NAME*" -o -name "*typegen*" \) 2>/dev/null | head -1)
+ local extracted_binary="${extract_dir}/${CTL_NAME}"
+
+  if [ ! -f "$extracted_binary" ]; then
+    error "Expected binary '${CTL_NAME}' not found in archive"
   fi
   
-  # If still not found, list all files and pick the first non-directory
-  if [ -z "$found_binary" ]; then
-    found_binary=$(find "$extract_dir" -type f 2>/dev/null | grep -v '\.txt$' | grep -v '\.md$' | head -1)
-  fi
+  cp "$extracted_binary" "${tmp_dir}/${CTL_NAME}"
+  chmod 755 "${tmp_dir}/${CTL_NAME}"
   
-  if [ -n "$found_binary" ] && [ -f "$found_binary" ]; then
-    # Move to tmp_dir with the correct name
-    cp "$found_binary" "${tmp_dir}/${CTL_NAME}"
-    chmod +x "${tmp_dir}/${CTL_NAME}"
-    success "Binary prepared: $(basename "$found_binary") -> $CTL_NAME"
-  else
-    error "Could not locate binary in the downloaded archive. Contents:"
-    find "$extract_dir" -type f | while read -r file; do
-      echo "  $file" >&2
-    done
-  fi
+  success "Binary prepared: $CTL_NAME"
   
   # Verify binary
   verify_binary "${tmp_dir}/${CTL_NAME}"
