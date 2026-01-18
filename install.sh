@@ -605,7 +605,10 @@ main() {
   done
   
   # Find the binary - check various possible locations
- local extracted_binary="${extract_dir}/${CTL_NAME}"
+ extracted_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" | head -1)
+
+  [ -n "$extracted_binary" ] || error "Binary not found after extraction"
+
 
   if [ ! -f "$extracted_binary" ]; then
     error "Expected binary '${CTL_NAME}' not found in archive"
