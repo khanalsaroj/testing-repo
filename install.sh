@@ -9,18 +9,18 @@ set -euo pipefail
 
 # -------- ASCII Art & Branding --------
 show_banner() {
-  cat <<"EOF"
-  
+  cat <<"CONFIGEOF"
+
   ████████╗██╗   ██╗██████╗ ███████╗ ██████╗ ███████╗███╗   ██╗
   ╚══██╔══╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔════╝ ██╔════╝████╗  ██╗
      ██║    ╚████╔╝ ██████╔╝█████╗  ██║  ███╗█████╗  ██╔██╗ ██║
      ██║     ╚██╔╝  ██╔═══╝ ██╔══╝  ██║   ██║██╔══╝  ██║╚██╗██║
      ██║      ██║   ██║     ███████╗╚██████╔╝███████╗██║ ╚████║
      ╚═╝      ╚═╝   ╚═╝     ╚══════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
-     
+
      🌟 Quantum Installation System | v2.0.0 🌟
-     
-EOF
+
+CONFIGEOF
 }
 
 # -------- Cosmic Constants --------
@@ -48,7 +48,7 @@ log() {
   shift
   local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
   local color=""
-  
+
   case "$level" in
     "SUCCESS") color="$COLOR_SUCCESS" ;;
     "INFO")    color="$COLOR_INFO" ;;
@@ -56,7 +56,7 @@ log() {
     "ERROR")   color="$COLOR_ERROR" ;;
     "DEBUG")   color="$COLOR_DEBUG" ;;
   esac
-  
+
   echo -e "${color}[${timestamp} | ${level}]${COLOR_RESET} $*" >&2
 }
 
@@ -108,25 +108,25 @@ run_with_spinner() {
 # -------- Quantum System Detection --------
 detect_system() {
   info "🔍 Scanning quantum signatures..."
-  
+
   OS=$(uname -s | tr '[:upper:]' '[:lower:]')
   ARCH=$(uname -m)
   KERNEL=$(uname -r)
   DISTRO=""
-  
+
   # Advanced distro detection
   if [ -f /etc/os-release ]; then
     . /etc/os-release
     DISTRO="${ID:-unknown}"
     DISTRO_VERSION="${VERSION_ID:-unknown}"
   fi
-  
+
   # Architecture normalization
   case "$ARCH" in
     x86_64|x64)      ARCH="amd64" ;;
     aarch64|arm64)   ARCH="arm64" ;;
     armv7l|armhf)    ARCH="armv7" ;;
-    *) 
+    *)
       warn "Uncommon architecture detected: $ARCH"
       if [ "${FORCE_ARCH:-}" ]; then
         ARCH="$FORCE_ARCH"
@@ -136,12 +136,12 @@ detect_system() {
       fi
       ;;
   esac
-  
+
   # OS compatibility
   if [[ ! " ${SUPPORTED_OS[@]} " =~ " ${OS} " ]]; then
     error "Unsupported OS: $OS"
   fi
-  
+
   info "System Profile:"
   info "  OS: $OS ($DISTRO $DISTRO_VERSION)"
   info "  Arch: $ARCH"
@@ -151,34 +151,34 @@ detect_system() {
 # -------- Version Telemetry --------
 resolve_version() {
   local version="${TYPEGEN_VERSION:-$DEFAULT_VERSION}"
-  
+
   if [ "$version" = "latest" ]; then
     info "📡 Connecting to version constellation..."
-    
+
     # Try multiple endpoints for resilience
     local endpoints=(
       "https://api.github.com/repos/${GITHUB_ORG}/${CTL_REPO}/releases/latest"
       "https://registry.npmjs.org/@typegen/cli/latest"
     )
-    
+
     for endpoint in "${endpoints[@]}"; do
       debug "Trying endpoint: $endpoint"
       local resolved=$(curl -sfL "$endpoint" 2>/dev/null | \
         grep -o '"tag_name": *"[^"]*"' | \
         cut -d'"' -f4) || continue
-      
+
       if [ -n "$resolved" ]; then
         version="$resolved"
         break
       fi
     done
-    
+
     [ -n "$version" ] || error "Version resolution failed across all endpoints"
   fi
-  
+
   # Clean version string
   version="${version#v}"  # Remove leading v if present
-  
+
   echo "$version"
 }
 
@@ -188,22 +188,22 @@ download_with_retry() {
   local output="$2"
   local max_retries=3
   local retry_delay=2
-  
+
   for ((i=1; i<=max_retries; i++)); do
     info "Download attempt $i/$max_retries"
-    
+
     if curl -fL --progress-bar --retry 3 --retry-delay 1 "$url" -o "$output"; then
       success "Download completed successfully"
       return 0
     fi
-    
+
     if [ $i -lt $max_retries ]; then
       warn "Download failed, retrying in ${retry_delay}s..."
       sleep $retry_delay
       retry_delay=$((retry_delay * 2))
     fi
   done
-  
+
   error "Download failed after $max_retries attempts"
 }
 
@@ -213,9 +213,9 @@ verify_binary() {
   if [ ! -f "$binary" ]; then
     error "Binary not found: $binary"
   fi
-  
+
   chmod +x "$binary"
-  
+
   # More robust version check
   if "$binary" --version >/dev/null 2>&1 || "$binary" version >/dev/null 2>&1 || "$binary" -v >/dev/null 2>&1; then
     success "Binary verification passed"
@@ -233,7 +233,7 @@ verify_binary() {
 # -------- Cosmic Installation --------
 create_directory_structure() {
   info "🌀 Creating quantum directory structure..."
-  
+
   local dirs=(
     "$INSTALL_DIR"
     "$INSTALL_DIR/data"
@@ -243,26 +243,25 @@ create_directory_structure() {
     "$INSTALL_DIR/backups"
     "$INSTALL_DIR/tmp"
   )
-  
+
   for dir in "${dirs[@]}"; do
     info "Creating directory: $dir"
     if ! mkdir -p "$dir" 2>&1; then
       error "Failed to create directory: $dir"
     fi
-    
+
     if ! chmod 755 "$dir" 2>&1; then
       warn "Failed to set permissions on: $dir"
     fi
-    
     debug "Created: $dir"
   done
-  
+
   # Special permissions for sensitive directories
   info "Setting special permissions on backups directory"
   if ! chmod 700 "$INSTALL_DIR/backups" 2>&1; then
     warn "Failed to set permissions on backups directory"
   fi
-  
+
   success "Directory structure created"
 }
 
@@ -270,11 +269,11 @@ create_directory_structure() {
 generate_config() {
   local version="$1"
   info "Starting config generation for version: $version"
-  
+
   local config_file="$INSTALL_DIR/config.yaml"
-  
+
   info "Writing config to: $config_file"
-  
+
   {
     echo "# TypeGen Configuration"
     echo "# Version: $version"
@@ -284,17 +283,17 @@ generate_config() {
     echo "  mode: \"production\""
     # ... etc
   } > "$config_file"
-  
+
   chmod 600 "$config_file"
   success "Configuration generated: $config_file"
 }
 
 setup_auto_completion() {
   info "⚡ Setting up cosmic auto-completion..."
-  
+
   local completion_dir=""
   local shell_rc=""
-  
+
   case "$SHELL" in
     */bash)
       completion_dir="/etc/bash_completion.d"
@@ -312,7 +311,7 @@ setup_auto_completion() {
       return 0
       ;;
   esac
-  
+
   if [ -d "$completion_dir" ]; then
     if "$BIN_DIR/$CTL_NAME" completion "${SHELL##*/}" > "$completion_dir/_$CTL_NAME" 2>/dev/null; then
       success "Auto-completion installed for ${SHELL##*/}"
@@ -322,10 +321,10 @@ setup_auto_completion() {
 
 create_service_files() {
   info "🚀 Generating service definitions..."
-  
+
   # Systemd service
   if command -v systemctl >/dev/null 2>&1; then
-    cat > /etc/systemd/system/typegen.service <<EOF
+    cat > /etc/systemd/system/typegen.service <<CONFIGEOF
 [Unit]
 Description=TypeGen Quantum Service
 Documentation=https://typegen.dev
@@ -350,14 +349,14 @@ LimitCORE=infinity
 
 [Install]
 WantedBy=multi-user.target
-EOF
-    
+CONFIGEOF
+
     systemctl daemon-reload
     success "Systemd service configured"
   fi
-  
+
   # Docker Compose fallback
-  cat > "$INSTALL_DIR/docker-compose.yml" <<EOF
+  cat > "$INSTALL_DIR/docker-compose.yml" <<CONFIGEOF
 version: '3.8'
 
 services:
@@ -389,42 +388,42 @@ services:
 networks:
   typegen-network:
     driver: bridge
-EOF
+CONFIGEOF
 }
 
 setup_environment() {
   info "🌍 Configuring quantum environment..."
-  
+
   local env_file="$INSTALL_DIR/.env"
-  
+
   if [ ! -f "$env_file" ]; then
-    cat > "$env_file" <<EOF
-# TypeGen Environment Configuration
-# Generated: $(date -Iseconds)
+    cat > "$env_file" <<CONFIGEOF
+        # TypeGen Environment Configuration
+        # Generated: $(date -Iseconds)
 
-# Database
-TYPEGEN_DB_HOST=localhost
-TYPEGEN_DB_PORT=5432
-TYPEGEN_DB_NAME=typegen
-TYPEGEN_DB_USER=typegen
-# TYPEGEN_DB_PASSWORD=  # Set this in production
+        # Database
+        TYPEGEN_DB_HOST=localhost
+        TYPEGEN_DB_PORT=5432
+        TYPEGEN_DB_NAME=typegen
+        TYPEGEN_DB_USER=typegen
+        # TYPEGEN_DB_PASSWORD=  # Set this in production
 
-# Redis
-TYPEGEN_REDIS_HOST=localhost
-TYPEGEN_REDIS_PORT=6379
+        # Redis
+        TYPEGEN_REDIS_HOST=localhost
+        TYPEGEN_REDIS_PORT=6379
 
-# Ports
-TYPEGEN_API_PORT=8080
-TYPEGEN_UI_PORT=3000
+        # Ports
+        TYPEGEN_API_PORT=8080
+        TYPEGEN_UI_PORT=3000
 
-# Security
-# TYPEGEN_ENCRYPTION_KEY=  # Generate with: openssl rand -hex 32
+        # Security
+        # TYPEGEN_ENCRYPTION_KEY=  # Generate with: openssl rand -hex 32
 
-# Optional
-TYPEGEN_LOG_LEVEL=info
-TYPEGEN_TELEMETRY=true
-EOF
-    
+        # Optional
+        TYPEGEN_LOG_LEVEL=info
+        TYPEGEN_TELEMETRY=true
+CONFIGEOF
+
     chmod 600 "$env_file"
     success "Environment file created: $env_file"
   fi
@@ -435,9 +434,9 @@ create_user() {
     info "System user 'typegen' already exists"
     return 0
   fi
-  
+
   info "👤 Creating dedicated system user..."
-  
+
   if command -v useradd >/dev/null 2>&1; then
     useradd -r -s /bin/false -d "$INSTALL_DIR" typegen
     usermod -aG docker typegen 2>/dev/null || true
@@ -451,15 +450,15 @@ create_user() {
 # -------- Post-Install Validation --------
 validate_installation() {
   info "🔬 Running quantum validation suite..."
-  
+
   local checks_passed=0
   local total_checks=0
-  
+
   check() {
     local name="$1"
     shift
     ((total_checks++))
-    
+
     if "$@" >/dev/null 2>&1; then
       success "✓ $name"
       ((checks_passed++))
@@ -469,25 +468,25 @@ validate_installation() {
       return 1
     fi
   }
-  
+
   echo ""
   echo "Validation Report:"
   echo "=================="
-  
+
   check "Binary exists" [ -f "$BIN_DIR/$CTL_NAME" ]
   check "Binary executable" [ -x "$BIN_DIR/$CTL_NAME" ]
   check "Install directory exists" [ -d "$INSTALL_DIR" ]
   check "Config file exists" [ -f "$INSTALL_DIR/config.yaml" ]
   check "Binary responds to --version" "$BIN_DIR/$CTL_NAME" --version
-  
+
   # Network connectivity check
   if check "GitHub reachable" curl -sI https://github.com -o /dev/null -w "%{http_code}" | grep -q "200"; then
     check "Latest version check" "$BIN_DIR/$CTL_NAME" version check
   fi
-  
+
   echo ""
   echo "Results: $checks_passed/$total_checks checks passed"
-  
+
   if [ "$checks_passed" -eq "$total_checks" ]; then
     success "🎉 Quantum validation complete!"
   else
@@ -499,16 +498,16 @@ validate_installation() {
 main() {
   # Declare tmp_dir as a global variable
   declare -g tmp_dir
-  
+
   show_banner
-  
+
   info "🚀 Initializing TypeGen Quantum Installer"
   info "Build: $(date -Iseconds) | PID: $$"
-  
+
   # Initialize temporary directory
   tmp_dir=$(mktemp -d -t typegen-install-XXXXXX)
   info "Using temporary directory: $tmp_dir"
-  
+
   # Cleanup function
   cleanup() {
     if [ -n "${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
@@ -516,78 +515,78 @@ main() {
       debug "Cleaned up temporary directory: $tmp_dir"
     fi
   }
-  
+
   # Set trap for cleanup
   trap cleanup EXIT INT TERM
-  
+
   # Prerequisite checks
   check_bash_version
   detect_system
-  
+
   # Root check with better error message
   if [ "$(id -u)" -ne 0 ]; then
     error "Elevated privileges required. Please run with sudo or as root."
   fi
-  
+
   # Dependency verification
   info "🔧 Verifying cosmic dependencies..."
   local deps=("curl" "uname" "chmod" "mkdir" "rm" "tar" "grep")
   for dep in "${deps[@]}"; do
     require_cmd "$dep"
   done
-  
+
   # Version resolution
   info "🌌 Resolving quantum version..."
   local version
   version=$(resolve_version) || error "Version resolution failed"
   info "Target version: v$version"
-  
+
   # Prepare for download
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
   info "Downloading: $download_url"
-  
+
   # Download the archive
   info "📥 Downloading quantum binary..."
   local archive_file="${tmp_dir}/download.tar.gz"
   download_with_retry "$download_url" "$archive_file"
-  
+
   # Verify download
   if [ ! -f "$archive_file" ]; then
     error "Downloaded file does not exist: $archive_file"
   fi
-  
+
   local file_size=$(stat -f%z "$archive_file" 2>/dev/null || stat -c%s "$archive_file" 2>/dev/null)
   if [ "$file_size" -lt 1000 ]; then
     error "Downloaded file is too small ($file_size bytes), likely corrupted"
   fi
   success "Downloaded archive ($file_size bytes)"
-  
+
   # Extract archive
   info "📦 Extracting binary..."
   local extract_dir="${tmp_dir}/extract"
   mkdir -p "$extract_dir"
-  
+
   if ! tar -xzf "$archive_file" -C "$extract_dir" 2>&1; then
     error "Failed to extract archive"
   fi
   success "Archive extracted"
-  
+
   # Debug: Show what was extracted
   info "📂 Extracted contents:"
   find "$extract_dir" -type f -ls | head -20
-  
+
   # Find the binary - try multiple strategies
   local extracted_binary=""
-  
+
   # Strategy 1: Look for exact name
   extracted_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" -print -quit)
-  
+
   # Strategy 2: Look for any executable
   if [ -z "$extracted_binary" ]; then
     warn "Binary '$CTL_NAME' not found, looking for executables..."
     extracted_binary=$(find "$extract_dir" -type f -executable -print -quit)
   fi
-  
+
   # Strategy 3: Look for common binary locations
   if [ -z "$extracted_binary" ]; then
     for potential_path in \
@@ -601,55 +600,55 @@ main() {
       fi
     done
   fi
-  
+
   # Strategy 4: Take the first regular file
   if [ -z "$extracted_binary" ]; then
     warn "Still no binary found, taking first file..."
     extracted_binary=$(find "$extract_dir" -type f -print -quit)
   fi
-  
+
   if [ -z "$extracted_binary" ] || [ ! -f "$extracted_binary" ]; then
     error "Could not locate binary in extracted archive. Contents were:
 $(find "$extract_dir" -type f)"
   fi
-  
+
   info "Found binary: $extracted_binary"
-  
+
   # Copy to temporary location
   cp "$extracted_binary" "${tmp_dir}/${CTL_NAME}"
   chmod 755 "${tmp_dir}/${CTL_NAME}"
-  
+
   success "Binary prepared: $CTL_NAME"
-  
+
   # Verify binary
   info "🔬 Verifying binary..."
   verify_binary "${tmp_dir}/${CTL_NAME}"
-  
+
   # Create directory structure
   create_directory_structure
-  
+
   # Install binary
   info "⚙️  Installing cosmic binary..."
   install -m 755 "${tmp_dir}/${CTL_NAME}" "$BIN_DIR/$CTL_NAME"
-  
+
   # Generate configuration
   generate_config "$version"
-  
+
   # Setup environment
   setup_environment
-  
+
   # Create user
   create_user
-  
+
   # Setup auto-completion
   setup_auto_completion
-  
+
   # Create service files
   create_service_files
-  
+
   # Final validation
   validate_installation
-  
+
   # Show success message
   echo ""
   echo "${COLOR_BOLD}✨ TypeGen Quantum Installation Complete! ✨${COLOR_RESET}"
@@ -661,10 +660,10 @@ $(find "$extract_dir" -type f)"
   echo "  ${COLOR_INFO}Data:${COLOR_RESET}       $INSTALL_DIR/data"
   echo "└─────────────────────────────────────────────────────────┘"
   echo ""
-  
+
   # Interactive next steps
   if [ -t 0 ]; then  # Check if stdin is a terminal
-    cat <<EOF
+    cat <<CONFIGEOF
 ${COLOR_BOLD}🚀 Next Steps:${COLOR_RESET}
 
 1. Configure environment:
@@ -687,9 +686,9 @@ ${COLOR_INFO}🐛 Report Issues:${COLOR_RESET} https://github.com/typegen/typege
 ${COLOR_INFO}💬 Community:${COLOR_RESET} https://discord.gg/typegen
 
 ${COLOR_SUCCESS}Thank you for choosing TypeGen!${COLOR_RESET}
-EOF
+CONFIGEOF
   fi
-  
+
   # Telemetry (anonymous, optional)
   if [ "${TYPEGEN_TELEMETRY:-true}" = "true" ]; then
     curl -s -X POST https://telemetry.typegen.dev/install \
@@ -697,7 +696,7 @@ EOF
       -d "{\"version\":\"$version\",\"os\":\"$OS\",\"arch\":\"$ARCH\",\"distro\":\"$DISTRO\"}" \
       >/dev/null 2>&1 &
   fi
-  
+
   exit 0
 }
 
