@@ -551,7 +551,7 @@ cleanup() {
 
 # Set trap for cleanup
 trap cleanup EXIT INT TERM
-
+tmp_dir=""
 # -------- Main Cosmic Routine --------
 main() {
   show_banner
