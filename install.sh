@@ -27,7 +27,7 @@ EOF
 readonly TYPEGEN_NAME="typegen"
 readonly INSTALL_DIR="/opt/typegen"
 readonly BIN_DIR="/usr/local/bin"
-readonly CTL_NAME="typegenctl"
+readonly CTL_NAME="projectnamectl"
 readonly GITHUB_ORG="khanalsaroj"
 readonly CTL_REPO="typegen-control-plane-backend"
 readonly DEFAULT_VERSION="latest"
