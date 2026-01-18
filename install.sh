@@ -541,19 +541,11 @@ validate_installation() {
   fi
 }
 
-# -------- Cleanup Function --------
-cleanup() {
-    if [ -n "${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
-        rm -rf "$tmp_dir"
-        debug "Cleaned up temporary directory: $tmp_dir"
-    fi
-}
-
-# Set trap for cleanup
-trap cleanup EXIT INT TERM
-tmp_dir=""
 # -------- Main Cosmic Routine --------
 main() {
+  # Declare tmp_dir as a global variable
+  declare -g tmp_dir
+  
   show_banner
   
   info "🚀 Initializing TypeGen Quantum Installer"
@@ -562,6 +554,17 @@ main() {
   # Initialize temporary directory
   tmp_dir=$(mktemp -d -t typegen-install-XXXXXX)
   info "Using temporary directory: $tmp_dir"
+  
+  # Cleanup function
+  cleanup() {
+    if [ -n "${tmp_dir:-}" ] && [ -d "$tmp_dir" ]; then
+      rm -rf "$tmp_dir"
+      debug "Cleaned up temporary directory: $tmp_dir"
+    fi
+  }
+  
+  # Set trap for cleanup
+  trap cleanup EXIT INT TERM
   
   # Prerequisite checks
   check_bash_version
@@ -585,60 +588,65 @@ main() {
   version=$(resolve_version) || error "Version resolution failed"
   info "Target version: v$version"
   
-  # Download and extract binary
+  # Prepare for download
   local download_url="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${version}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
+  info "Downloading: $download_url"
+  
+  # Download the archive
   info "📥 Downloading quantum binary..."
+  local archive_file="${tmp_dir}/download.tar.gz"
+  download_with_retry "$download_url" "$archive_file"
   
-  # Create temporary directory for extraction
-  local extract_dir="$tmp_dir/extract"
-  mkdir -p "$extract_dir"
-  
-  # Download and extract
-  download_with_retry "$download_url" "$tmp_dir/download.tar.gz"
+  # Extract archive
   info "📦 Extracting binary..."
-  tar -xzf "$tmp_dir/download.tar.gz" -C "$extract_dir"
+  local extract_dir="${tmp_dir}/extract"
+  mkdir -p "$extract_dir"
+  tar -xzf "$archive_file" -C "$extract_dir"
   
-  # Find and move the binary - handle different possible locations
+  # Debug: List extracted contents
+  debug "Extracted contents:"
+  find "$extract_dir" -type f | while read -r file; do
+    debug "  $file"
+  done
+  
+  # Find the binary - check various possible locations
   info "🔧 Preparing binary..."
   local found_binary=""
   
-  # Look for binary in common locations
-  possible_paths=(
-    "$extract_dir/$CTL_NAME"
-    "$extract_dir/${CTL_NAME}-${OS}-${ARCH}"
-    "$extract_dir/${CTL_NAME}-${OS}-${ARCH}/$CTL_NAME"
-    "$extract_dir/bin/$CTL_NAME"
-    "$extract_dir/usr/local/bin/$CTL_NAME"
-  )
+  # First, try to find any executable file
+  found_binary=$(find "$extract_dir" -type f -executable 2>/dev/null | head -1)
   
-  for path in "${possible_paths[@]}"; do
-    if [ -f "$path" ]; then
-      found_binary="$path"
-      break
-    fi
-  done
-  
-  # If not found, search recursively
+  # If no executable found, look for files with common names
   if [ -z "$found_binary" ]; then
-    found_binary=$(find "$extract_dir" -type f -name "$CTL_NAME" -o -name "$CTL_NAME-*" | head -1)
+    found_binary=$(find "$extract_dir" -type f \( -name "$CTL_NAME" -o -name "*$CTL_NAME*" -o -name "*typegen*" \) 2>/dev/null | head -1)
+  fi
+  
+  # If still not found, list all files and pick the first non-directory
+  if [ -z "$found_binary" ]; then
+    found_binary=$(find "$extract_dir" -type f 2>/dev/null | grep -v '\.txt$' | grep -v '\.md$' | head -1)
   fi
   
   if [ -n "$found_binary" ] && [ -f "$found_binary" ]; then
-    mv "$found_binary" "$tmp_dir/$CTL_NAME"
-    success "Binary found and prepared"
+    # Move to tmp_dir with the correct name
+    cp "$found_binary" "${tmp_dir}/${CTL_NAME}"
+    chmod +x "${tmp_dir}/${CTL_NAME}"
+    success "Binary prepared: $(basename "$found_binary") -> $CTL_NAME"
   else
-    error "Could not locate binary in the downloaded archive"
+    error "Could not locate binary in the downloaded archive. Contents:"
+    find "$extract_dir" -type f | while read -r file; do
+      echo "  $file" >&2
+    done
   fi
   
   # Verify binary
-  verify_binary "$tmp_dir/$CTL_NAME"
+  verify_binary "${tmp_dir}/${CTL_NAME}"
   
   # Create directory structure
   create_directory_structure
   
   # Install binary
   info "⚙️  Installing cosmic binary..."
-  install -m 755 "$tmp_dir/$CTL_NAME" "$BIN_DIR/$CTL_NAME"
+  install -m 755 "${tmp_dir}/${CTL_NAME}" "$BIN_DIR/$CTL_NAME"
   
   # Generate configuration
   generate_config "$version"
@@ -679,13 +687,13 @@ ${COLOR_BOLD}🚀 Next Steps:${COLOR_RESET}
    ${COLOR_INFO}nano $INSTALL_DIR/.env${COLOR_RESET}
 
 2. Start TypeGen:
-   ${COLOR_INFO}typegenctl start${COLOR_RESET}
+   ${COLOR_INFO}$CTL_NAME start${COLOR_RESET}
 
 3. Enable auto-start:
    ${COLOR_INFO}sudo systemctl enable --now typegen${COLOR_RESET}
 
 4. Monitor logs:
-   ${COLOR_INFO}typegenctl logs --follow${COLOR_RESET}
+   ${COLOR_INFO}$CTL_NAME logs --follow${COLOR_RESET}
 
 5. Access dashboard:
    ${COLOR_INFO}http://localhost:3000${COLOR_RESET}
