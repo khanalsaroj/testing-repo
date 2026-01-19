@@ -297,36 +297,36 @@ create_service_files() {
   # Systemd service
   if command -v systemctl >/dev/null 2>&1; then
     cat > /etc/systemd/system/typegen.service <<CONFIGEOF
-  [Unit]
-  Description=TypeGen Controller Service
-  Documentation=https://typegen.dev
-  After=network.target docker.service
-  Requires=docker.service
+      [Unit]
+      Description=TypeGen Controller Service
+      Documentation=https://typegen.dev
+      After=network.target docker.service
+      Requires=docker.service
 
-  [Service]
-  Type=simple
-  User=typegen
-  Group=typegen
+      [Service]
+      Type=simple
+      User=typegen
+      Group=typegen
 
-  Environment=INSTALL_DIR=/opt/typegen
-  Environment=BIN_DIR=/opt/typegen/bin
-  Environment=CTL_NAME=typegenctl
-  EnvironmentFile=-/opt/typegen/.env
+      Environment=INSTALL_DIR=/opt/typegen
+      Environment=BIN_DIR=/opt/typegen/bin
+      Environment=CTL_NAME=typegenctl
+      EnvironmentFile=-/opt/typegen/.env
 
-  WorkingDirectory=/opt/typegen
-  ExecStart=/opt/typegen/bin/typegenctl start
-  ExecStop=/opt/typegen/bin/typegenctl stop
+      WorkingDirectory=/opt/typegen
+      ExecStart=/opt/typegen/bin/typegenctl start
+      ExecStop=/opt/typegen/bin/typegenctl stop
 
-  Restart=always
-  RestartSec=5
-  TimeoutStopSec=30
+      Restart=always
+      RestartSec=5
+      TimeoutStopSec=30
 
-  LimitNOFILE=65536
-  LimitNPROC=infinity
-  LimitCORE=infinity
+      LimitNOFILE=65536
+      LimitNPROC=infinity
+      LimitCORE=infinity
 
-  [Install]
-  WantedBy=multi-user.target
+      [Install]
+      WantedBy=multi-user.target
 CONFIGEOF
 
     systemctl daemon-reload
