@@ -651,13 +651,13 @@ $(find "$extract_dir" -type f)"
 
   # Show success message
   echo ""
-  echo "${COLOR_BOLD}✨ TypeGen Quantum Installation Complete! ✨${COLOR_RESET}"
+  echo "✨ TypeGen Quantum Installation Complete! ✨"
   echo ""
   echo "┌─────────────────────────────────────────────────────────┐"
-  echo "  ${COLOR_INFO}Version:${COLOR_RESET}    v$version"
-  echo "  ${COLOR_INFO}Binary:${COLOR_RESET}     $BIN_DIR/$CTL_NAME"
-  echo "  ${COLOR_INFO}Config:${COLOR_RESET}     $INSTALL_DIR/config.yaml"
-  echo "  ${COLOR_INFO}Data:${COLOR_RESET}       $INSTALL_DIR/data"
+  echo "  Version:                v$version"
+  echo "  Binary:                 $BIN_DIR/$CTL_NAME"
+  echo "  Config:                 $INSTALL_DIR/config.yaml"
+  echo "  Data:                   $INSTALL_DIR/data"
   echo "└─────────────────────────────────────────────────────────┘"
   echo ""
 
