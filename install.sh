@@ -316,7 +316,6 @@ create_service_files() {
   WorkingDirectory=/opt/typegen
   ExecStart=/opt/typegen/bin/typegenctl start
   ExecStop=/opt/typegen/bin/typegenctl stop
-  ExecReload=/bin/kill -HUP $MAINPID
 
   Restart=always
   RestartSec=5
