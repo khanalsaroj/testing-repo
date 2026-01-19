@@ -398,30 +398,14 @@ setup_environment() {
 
   if [ ! -f "$env_file" ]; then
     cat > "$env_file" <<CONFIGEOF
-        # TypeGen Environment Configuration
-        # Generated: $(date -Iseconds)
+# TypeGen Environment Configuration
+# Generated: $(date -Iseconds)
+# Ports
+TYPEGEN_API_PORT=8080
+TYPEGEN_UI_PORT=3000
 
-        # Database
-        TYPEGEN_DB_HOST=localhost
-        TYPEGEN_DB_PORT=5432
-        TYPEGEN_DB_NAME=typegen
-        TYPEGEN_DB_USER=typegen
-        # TYPEGEN_DB_PASSWORD=  # Set this in production
-
-        # Redis
-        TYPEGEN_REDIS_HOST=localhost
-        TYPEGEN_REDIS_PORT=6379
-
-        # Ports
-        TYPEGEN_API_PORT=8080
-        TYPEGEN_UI_PORT=3000
-
-        # Security
-        # TYPEGEN_ENCRYPTION_KEY=  # Generate with: openssl rand -hex 32
-
-        # Optional
-        TYPEGEN_LOG_LEVEL=info
-        TYPEGEN_TELEMETRY=true
+# Optional
+TYPEGEN_LOG_LEVEL=info
 CONFIGEOF
 
     chmod 600 "$env_file"
@@ -652,7 +636,7 @@ $(find "$extract_dir" -type f)"
   # Show success message
   echo ""
   echo "✨ TypeGen Installation Complete! ✨"
-
+  echo "  Binary:       $BIN_DIR/$CTL_NAME"
 
   # Interactive next steps
   if [ -t 0 ]; then  # Check if stdin is a terminal
