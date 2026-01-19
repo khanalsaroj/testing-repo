@@ -46,6 +46,7 @@ readonly COLOR_DEBUG='\033[0;90m'
 log() {
   local level="$1"
   shift
+  # shellcheck disable=SC2155
   local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
   local color=""
 
@@ -138,6 +139,8 @@ detect_system() {
   esac
 
   # OS compatibility
+  # shellcheck disable=SC2199
+  # shellcheck disable=SC2076
   if [[ ! " ${SUPPORTED_OS[@]} " =~ " ${OS} " ]]; then
     error "Unsupported OS: $OS"
   fi
@@ -288,67 +291,44 @@ generate_config() {
   success "Configuration generated: $config_file"
 }
 
-setup_auto_completion() {
-  info "⚡ Setting up cosmic auto-completion..."
-
-  local completion_dir=""
-  local shell_rc=""
-
-  case "$SHELL" in
-    */bash)
-      completion_dir="/etc/bash_completion.d"
-      shell_rc="$HOME/.bashrc"
-      ;;
-    */zsh)
-      completion_dir="/usr/local/share/zsh/site-functions"
-      shell_rc="$HOME/.zshrc"
-      ;;
-    */fish)
-      completion_dir="/etc/fish/completions"
-      ;;
-    *)
-      warn "Shell auto-completion not configured for $SHELL"
-      return 0
-      ;;
-  esac
-
-  if [ -d "$completion_dir" ]; then
-    if "$BIN_DIR/$CTL_NAME" completion "${SHELL##*/}" > "$completion_dir/_$CTL_NAME" 2>/dev/null; then
-      success "Auto-completion installed for ${SHELL##*/}"
-    fi
-  fi
-}
-
 create_service_files() {
   info "🚀 Generating service definitions..."
 
   # Systemd service
   if command -v systemctl >/dev/null 2>&1; then
     cat > /etc/systemd/system/typegen.service <<CONFIGEOF
-          [Unit]
-          Description=TypeGen Quantum Service
-          Documentation=https://typegen.dev
-          After=network.target docker.service
-          Requires=docker.service
+[Unit]
+Description=TypeGen Controller Service
+Documentation=https://typegen.dev
+After=network.target docker.service
+Requires=docker.service
 
-          [Service]
-          Type=exec
-          User=typegen
-          Group=typegen
-          WorkingDirectory=$INSTALL_DIR
-          EnvironmentFile=$INSTALL_DIR/.env
-          ExecStart=$BIN_DIR/$CTL_NAME start
-          ExecStop=$BIN_DIR/$CTL_NAME stop
-          ExecReload=$BIN_DIR/$CTL_NAME restart
-          Restart=always
-          RestartSec=5
-          TimeoutStopSec=30
-          LimitNOFILE=65536
-          LimitNPROC=infinity
-          LimitCORE=infinity
+[Service]
+Type=simple
+User=typegen
+Group=typegen
 
-          [Install]
-          WantedBy=multi-user.target
+Environment=INSTALL_DIR=/opt/typegen
+Environment=BIN_DIR=/opt/typegen/bin
+Environment=CTL_NAME=typegenctl
+EnvironmentFile=-/opt/typegen/.env
+
+WorkingDirectory=/opt/typegen
+ExecStart=/opt/typegen/bin/typegenctl start
+ExecStop=/opt/typegen/bin/typegenctl stop
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+LimitNOFILE=65536
+LimitNPROC=infinity
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+
 CONFIGEOF
 
     systemctl daemon-reload
@@ -389,28 +369,6 @@ networks:
   typegen-network:
     driver: bridge
 CONFIGEOF
-}
-
-setup_environment() {
-  info "🌍 Configuring quantum environment..."
-
-  local env_file="$INSTALL_DIR/.env"
-
-  if [ ! -f "$env_file" ]; then
-    cat > "$env_file" <<CONFIGEOF
-# TypeGen Environment Configuration
-# Generated: $(date -Iseconds)
-# Ports
-TYPEGEN_API_PORT=8080
-TYPEGEN_UI_PORT=3000
-
-# Optional
-TYPEGEN_LOG_LEVEL=info
-CONFIGEOF
-
-    chmod 600 "$env_file"
-    success "Environment file created: $env_file"
-  fi
 }
 
 create_user() {
@@ -618,14 +576,8 @@ $(find "$extract_dir" -type f)"
   # Generate configuration
   generate_config "$version"
 
-  # Setup environment
-  setup_environment
-
   # Create user
   create_user
-
-  # Setup auto-completion
-  setup_auto_completion
 
   # Create service files
   create_service_files
