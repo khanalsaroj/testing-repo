@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euo pipefail  # Strict, safe, fail-fast execution
 
 ############################################################
 # ⚡ TYPEGEN HYPER-INSTALLER v2.0 ⚡
@@ -232,34 +232,34 @@ verify_binary() {
 
 # -------- Cosmic Installation --------
 create_directory_structure() {
-  info "🌀 Creating quantum directory structure..."
+  info "🌀 Creating directory structure..."
 
-  local dirs=(
-    "$INSTALL_DIR"
-    "$INSTALL_DIR/data"
-    "$INSTALL_DIR/logs"
-    "$INSTALL_DIR/plugins"
-    "$INSTALL_DIR/config"
-    "$INSTALL_DIR/backups"
-    "$INSTALL_DIR/tmp"
-  )
+  # Ensure /opt exists
+  mkdir -p "/opt" 2>/dev/null || {
+    error "Failed to create /opt"
+  }
 
-  for dir in "${dirs[@]}"; do
-    info "Creating directory: $dir"
-    if ! mkdir -p "$dir" 2>&1; then
-      error "Failed to create directory: $dir"
-    fi
+  # Create main directory
+  mkdir -p "$INSTALL_DIR" || {
+    error "Failed to create $INSTALL_DIR"
+  }
 
-    if ! chmod 755 "$dir" 2>&1; then
-      warn "Failed to set permissions on: $dir"
-    fi
-    debug "Created: $dir"
-  done
+  # Create subdirectories with secure permissions
+  mkdir -p "$INSTALL_DIR/data" "$INSTALL_DIR/logs" "$INSTALL_DIR/plugins" \
+           "$INSTALL_DIR/config" "$INSTALL_DIR/backups" "$INSTALL_DIR/tmp" || {
+    error "Failed to create subdirectories"
+  }
 
-  # Special permissions for sensitive directories
-  info "Setting special permissions on backups directory"
-  if ! chmod 700 "$INSTALL_DIR/backups" 2>&1; then
-    warn "Failed to set permissions on backups directory"
+  # Set secure permissions
+  chmod 755 "$INSTALL_DIR" "$INSTALL_DIR/plugins"
+  chmod 750 "$INSTALL_DIR/config"
+  chmod 770 "$INSTALL_DIR/data" "$INSTALL_DIR/logs" "$INSTALL_DIR/backups"
+  chmod 1777 "$INSTALL_DIR/tmp"  # Sticky bit
+
+  # Try to set ownership if root
+  if [ "$(id -u)" -eq 0 ]; then
+    chown root:root "$INSTALL_DIR" "$INSTALL_DIR/plugins" 2>/dev/null || true
+    chown root:root "$INSTALL_DIR/config" 2>/dev/null || true
   fi
 
   success "Directory structure created"
@@ -664,39 +664,30 @@ $(find "$extract_dir" -type f)"
   # Interactive next steps
   if [ -t 0 ]; then  # Check if stdin is a terminal
     cat <<CONFIGEOF
-${COLOR_BOLD}🚀 Next Steps:${COLOR_RESET}
+          ${COLOR_BOLD}🚀 Next Steps:${COLOR_RESET}
 
-1. Configure environment:
-   ${COLOR_INFO}nano $INSTALL_DIR/.env${COLOR_RESET}
+          1. Configure environment:
+             ${COLOR_INFO}nano $INSTALL_DIR/.env${COLOR_RESET}
 
-2. Start TypeGen:
-   ${COLOR_INFO}$CTL_NAME start${COLOR_RESET}
+          2. Start TypeGen:
+             ${COLOR_INFO}$CTL_NAME start${COLOR_RESET}
 
-3. Enable auto-start:
-   ${COLOR_INFO}sudo systemctl enable --now typegen${COLOR_RESET}
+          3. Enable auto-start:
+             ${COLOR_INFO}sudo systemctl enable --now typegen${COLOR_RESET}
 
-4. Monitor logs:
-   ${COLOR_INFO}$CTL_NAME logs --follow${COLOR_RESET}
+          4. Monitor logs:
+             ${COLOR_INFO}$CTL_NAME logs --follow${COLOR_RESET}
 
-5. Access dashboard:
-   ${COLOR_INFO}http://localhost:3000${COLOR_RESET}
+          5. Access dashboard:
+             ${COLOR_INFO}http://localhost:3000${COLOR_RESET}
 
-${COLOR_INFO}📚 Documentation:${COLOR_RESET} https://docs.typegen.dev
-${COLOR_INFO}🐛 Report Issues:${COLOR_RESET} https://github.com/typegen/typegenctl/issues
-${COLOR_INFO}💬 Community:${COLOR_RESET} https://discord.gg/typegen
+          ${COLOR_INFO}📚 Documentation:${COLOR_RESET} https://docs.typegen.dev
+          ${COLOR_INFO}🐛 Report Issues:${COLOR_RESET} https://github.com/typegen/typegenctl/issues
+          ${COLOR_INFO}💬 Community:${COLOR_RESET} https://discord.gg/typegen
 
-${COLOR_SUCCESS}Thank you for choosing TypeGen!${COLOR_RESET}
+          ${COLOR_SUCCESS}Thank you for choosing TypeGen!${COLOR_RESET}
 CONFIGEOF
   fi
-
-  # Telemetry (anonymous, optional)
-  if [ "${TYPEGEN_TELEMETRY:-true}" = "true" ]; then
-    curl -s -X POST https://telemetry.typegen.dev/install \
-      -H "Content-Type: application/json" \
-      -d "{\"version\":\"$version\",\"os\":\"$OS\",\"arch\":\"$ARCH\",\"distro\":\"$DISTRO\"}" \
-      >/dev/null 2>&1 &
-  fi
-
   exit 0
 }
 
