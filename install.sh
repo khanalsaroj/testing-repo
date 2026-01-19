@@ -651,15 +651,8 @@ $(find "$extract_dir" -type f)"
 
   # Show success message
   echo ""
-  echo "✨ TypeGen Quantum Installation Complete! ✨"
-  echo ""
-  echo "┌─────────────────────────────────────────────────────────┐"
-  echo "  Version:                v$version"
-  echo "  Binary:                 $BIN_DIR/$CTL_NAME"
-  echo "  Config:                 $INSTALL_DIR/config.yaml"
-  echo "  Data:                   $INSTALL_DIR/data"
-  echo "└─────────────────────────────────────────────────────────┘"
-  echo ""
+  echo "✨ TypeGen Installation Complete! ✨"
+
 
   # Interactive next steps
   if [ -t 0 ]; then  # Check if stdin is a terminal
