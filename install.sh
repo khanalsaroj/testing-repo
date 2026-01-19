@@ -27,9 +27,9 @@ CONFIGEOF
 readonly TYPEGEN_NAME="typegen"
 readonly INSTALL_DIR="/opt/typegen"
 readonly BIN_DIR="/usr/local/bin"
-readonly CTL_NAME="projectnamectl"
+readonly CTL_NAME="typegenctl"
 readonly GITHUB_ORG="khanalsaroj"
-readonly CTL_REPO="typegen-control-plane-backend"
+readonly CTL_REPO="typegenctl"
 readonly DEFAULT_VERSION="latest"
 readonly MIN_BASH_VERSION=4
 readonly SUPPORTED_OS=("linux" "darwin")
