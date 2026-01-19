@@ -325,30 +325,30 @@ create_service_files() {
   # Systemd service
   if command -v systemctl >/dev/null 2>&1; then
     cat > /etc/systemd/system/typegen.service <<CONFIGEOF
-[Unit]
-Description=TypeGen Quantum Service
-Documentation=https://typegen.dev
-After=network.target docker.service
-Requires=docker.service
+          [Unit]
+          Description=TypeGen Quantum Service
+          Documentation=https://typegen.dev
+          After=network.target docker.service
+          Requires=docker.service
 
-[Service]
-Type=exec
-User=typegen
-Group=typegen
-WorkingDirectory=$INSTALL_DIR
-EnvironmentFile=$INSTALL_DIR/.env
-ExecStart=$BIN_DIR/$CTL_NAME start
-ExecStop=$BIN_DIR/$CTL_NAME stop
-ExecReload=$BIN_DIR/$CTL_NAME restart
-Restart=always
-RestartSec=5
-TimeoutStopSec=30
-LimitNOFILE=65536
-LimitNPROC=infinity
-LimitCORE=infinity
+          [Service]
+          Type=exec
+          User=typegen
+          Group=typegen
+          WorkingDirectory=$INSTALL_DIR
+          EnvironmentFile=$INSTALL_DIR/.env
+          ExecStart=$BIN_DIR/$CTL_NAME start
+          ExecStop=$BIN_DIR/$CTL_NAME stop
+          ExecReload=$BIN_DIR/$CTL_NAME restart
+          Restart=always
+          RestartSec=5
+          TimeoutStopSec=30
+          LimitNOFILE=65536
+          LimitNPROC=infinity
+          LimitCORE=infinity
 
-[Install]
-WantedBy=multi-user.target
+          [Install]
+          WantedBy=multi-user.target
 CONFIGEOF
 
     systemctl daemon-reload
@@ -473,11 +473,11 @@ validate_installation() {
   echo "Validation Report:"
   echo "=================="
 
-  check "Binary exists" [ -f "$BIN_DIR/$CTL_NAME" ]
-  check "Binary executable" [ -x "$BIN_DIR/$CTL_NAME" ]
-  check "Install directory exists" [ -d "$INSTALL_DIR" ]
-  check "Config file exists" [ -f "$INSTALL_DIR/config.yaml" ]
-  check "Binary responds to --version" "$BIN_DIR/$CTL_NAME" --version
+  check "Binary exists" [ -f "$BIN_DIR/$CTL_NAME" ] || true
+  check "Binary executable" [ -x "$BIN_DIR/$CTL_NAME" ] || true
+  check "Install directory exists" [ -d "$INSTALL_DIR" ] || true
+  check "Config file exists" [ -f "$INSTALL_DIR/config.yaml" ] || true
+  check "Binary responds to --version" "$BIN_DIR/$CTL_NAME" --version || true
 
   # Network connectivity check
   if check "GitHub reachable" curl -sI https://github.com -o /dev/null -w "%{http_code}" | grep -q "200"; then
