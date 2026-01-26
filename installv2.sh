@@ -1,255 +1,193 @@
 #!/usr/bin/env bash
-set -e  # Exit on error
+set -euo pipefail
 
-########################################################
-# Simple TypeGen Installer
-# A straightforward installation script
-########################################################
+############################################
+# TypeGen CLI Installer
+############################################
 
-# Configuration
-INSTALL_DIR="/opt/typegen"
-BIN_DIR="/usr/local/bin"
-BINARY_NAME="typegenctl"
+# ---------- Core Identity ----------
+APP_NAME="typegen"
+CTL_NAME="typegencli"
+TEMP_CTL_NAME="projectnamectl"
 GITHUB_ORG="khanalsaroj"
-GITHUB_REPO="typegenctl"
-VERSION="${TYPEGEN_VERSION:-latest}"
+CTL_REPO="typegencli"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# ---------- Paths (IMPORTANT SEPARATION) ----------
+BIN_DIR="/usr/local/bin"
+APP_HOME="/opt/${APP_NAME}"
 
-# Simple logging functions
-info() {
-    echo -e "${BLUE}[INFO]${NC} $*"
+CONFIG_DIR="$APP_HOME/config"
+DATA_DIR="$APP_HOME/data"
+LOG_DIR="$APP_HOME/logs"
+
+DEFAULT_CONFIG_FILE="$CONFIG_DIR/config.yaml"
+
+# ---------- Versioning ----------
+DEFAULT_VERSION="latest"
+MIN_BASH_VERSION=4
+SUPPORTED_OS=("linux" "darwin")
+
+# ---------- Logging ----------
+info()    { printf "%s\n" "$*"; }
+success() { printf "[OK]   %s\n" "$*"; }
+error()   { printf "[ERR]  %s\n" "$*" >&2; exit 1; }
+
+# ---------- Preconditions ----------
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || error "Missing required command: $1"
 }
 
-success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $*"
+check_bash() {
+  (( BASH_VERSINFO[0] >= MIN_BASH_VERSION )) || \
+    error "Bash ${MIN_BASH_VERSION}+ required"
 }
 
-warn() {
-    echo -e "${YELLOW}[WARN]${NC} $*"
+require_root() {
+  [[ "$(id -u)" -eq 0 ]] || error "Run as root (use sudo)"
 }
 
-error() {
-    echo -e "${RED}[ERROR]${NC} $*"
-    exit 1
-}
-
-# Show banner
-show_banner() {
-    echo ""
-    echo "╔════════════════════════════════════╗"
-    echo "║   TypeGen Installer v1.0           ║"
-    echo "╚════════════════════════════════════╝"
-    echo ""
-}
-
-# Check if running as root
-check_root() {
-    if [ "$(id -u)" -ne 0 ]; then
-        error "This script must be run as root. Please use sudo."
-    fi
-}
-
-# Check required commands
-check_dependencies() {
-    info "Checking dependencies..."
-    
-    for cmd in curl tar; do
-        if ! command -v "$cmd" >/dev/null 2>&1; then
-            error "Required command not found: $cmd"
-        fi
-    done
-    
-    success "All dependencies found"
-}
-
-# Detect system
-detect_system() {
-    info "Detecting system..."
-    
-    OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-    ARCH=$(uname -m)
-    
-    # Normalize architecture
-    case "$ARCH" in
-        x86_64|x64) ARCH="amd64" ;;
-        aarch64|arm64) ARCH="arm64" ;;
-        *) error "Unsupported architecture: $ARCH" ;;
-    esac
-    
-    info "System: $OS / $ARCH"
-}
-
-# Get latest version
-get_version() {
-    if [ "$VERSION" = "latest" ]; then
-        info "Fetching latest version..."
-        
-        VERSION=$(curl -sf "https://api.github.com/repos/${GITHUB_ORG}/${GITHUB_REPO}/releases/latest" \
-            | grep '"tag_name"' \
-            | cut -d'"' -f4 \
-            | sed 's/^v//')
-        
-        if [ -z "$VERSION" ]; then
-            error "Failed to fetch latest version"
-        fi
-    fi
-    
-    info "Installing version: $VERSION"
-}
-
-# Spinner function
+# ---------- Spinner ----------
 spinner() {
-    local pid=$1
-    local message=$2
-    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    local i=0
-    
-    echo -n "$message "
-    while kill -0 $pid 2>/dev/null; do
-        local char="${spinstr:i++%${#spinstr}:1}"
-        printf "\r$message %s" "$char"
-        sleep 0.1
-    done
-    printf "\r$message ✓\n"
+  local pid=$1
+  local frames='|/-\'
+  local i=0
+
+  while kill -0 "$pid" 2>/dev/null; do
+    printf "\r[%c] Working..." "${frames:i++%4:1}"
+    sleep 0.1
+  done
+
+  printf "\r[✓] Done            \n"
 }
 
-# Download binary with spinner
-download_binary() {
-    local url="https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/v${VERSION}/${BINARY_NAME}-${OS}-${ARCH}.tar.gz"
-    local temp_dir=$(mktemp -d)
-    local archive="${temp_dir}/download.tar.gz"
-    
-    # Download in background with spinner
-    (curl -fL "$url" -o "$archive" 2>/dev/null) &
-    local download_pid=$!
-    
-    spinner $download_pid "${BLUE}[INFO]${NC} Downloading binary..."
-    
-    wait $download_pid
-    local exit_code=$?
-    
-    if [ $exit_code -ne 0 ]; then
-        rm -rf "$temp_dir"
-        error "Failed to download from: $url"
-    fi
-    
-    success "Download complete"
-    echo "$temp_dir"
+run_with_spinner() {
+  ("$@" >/dev/null 2>&1) &
+  spinner $!
 }
 
-# Extract and install
-install_binary() {
-    local temp_dir="$1"
-    local archive="${temp_dir}/download.tar.gz"
-    
-    info "Extracting binary..."
-    tar -xzf "$archive" -C "$temp_dir"
-    
-    # Find the binary
-    local binary=$(find "$temp_dir" -type f -name "$BINARY_NAME" -o -type f -executable | head -1)
-    
-    if [ -z "$binary" ] || [ ! -f "$binary" ]; then
-        error "Binary not found in archive"
-    fi
-    
-    info "Installing to $BIN_DIR..."
-    chmod +x "$binary"
-    cp "$binary" "$BIN_DIR/$BINARY_NAME"
-    
-    success "Binary installed"
+# ---------- System Detection ----------
+detect_system() {
+  OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  ARCH="$(uname -m)"
+
+  case "$ARCH" in
+    x86_64) ARCH="amd64" ;;
+    arm64|aarch64) ARCH="arm64" ;;
+    *) error "Unsupported architecture: $ARCH" ;;
+  esac
+
+  [[ " ${SUPPORTED_OS[*]} " =~ " ${OS} " ]] || \
+    error "Unsupported OS: $OS"
 }
 
-# Create directories
+# ---------- Version Resolution ----------
+resolve_version() {
+  if [[ "$DEFAULT_VERSION" != "latest" ]]; then
+    echo "$DEFAULT_VERSION"
+    return
+  fi
+
+  curl -sfL \
+    "https://api.github.com/repos/${GITHUB_ORG}/${CTL_REPO}/releases/latest" |
+    grep -o '"tag_name": *"[^"]*"' |
+    cut -d'"' -f4 |
+    sed 's/^v//'
+}
+
+# ---------- Directory Setup ----------
 create_directories() {
-    info "Creating directories..."
-    
-    mkdir -p "$INSTALL_DIR"
-    mkdir -p "$INSTALL_DIR/config"
-    mkdir -p "$INSTALL_DIR/data"
-    mkdir -p "$INSTALL_DIR/logs"
-    
-    chmod 755 "$INSTALL_DIR"
-    
-    success "Directories created"
+  info "Creating application directories under $APP_HOME"
+
+  mkdir -p \
+    "$CONFIG_DIR" \
+    "$DATA_DIR" \
+    "$LOG_DIR"
+
+  chmod 755 "$APP_HOME"
+  chmod 750 "$CONFIG_DIR"
+  chmod 770 "$DATA_DIR" "$LOG_DIR"
+
+  success "Directory structure created"
 }
 
-# Create basic config
-create_config() {
-    info "Creating configuration..."
-    
-    cat > "$INSTALL_DIR/config/config.yaml" <<EOF
-# TypeGen Configuration
-version: "$VERSION"
-install_date: "$(date -I)"
+find_binary() {
+  local root="$1"
+  local bin=""
 
-typegen:
-  mode: production
-  log_level: info
-  data_dir: $INSTALL_DIR/data
-EOF
-    
-    chmod 644 "$INSTALL_DIR/config/config.yaml"
-    success "Configuration created"
+  # Strategy 1: exact match
+  bin="$(find "$root" -type f -name "$CTL_NAME" -print -quit)"
+
+  # Strategy 2: OS/ARCH suffixed
+  if [[ -z "$bin" ]]; then
+    bin="$(find "$root" -type f -name "${CTL_NAME}-${OS}-${ARCH}" -print -quit)"
+  fi
+
+  # Strategy 3: any executable named like the binary
+  if [[ -z "$bin" ]]; then
+    bin="$(find "$root" -type f -executable -name "*${CTL_NAME}*" -print -quit)"
+  fi
+
+  # Strategy 4: bin/ directory
+  if [[ -z "$bin" && -d "$root/bin" ]]; then
+    bin="$(find "$root/bin" -type f -print -quit)"
+  fi
+
+  # Strategy 5: last resort — first regular file
+  if [[ -z "$bin" ]]; then
+    bin="$(find "$root" -type f -print -quit)"
+  fi
+
+  [[ -n "$bin" ]] || return 1
+  echo "$bin"
 }
 
-# Verify installation
-verify_installation() {
-    info "Verifying installation..."
-    
-    if [ ! -x "$BIN_DIR/$BINARY_NAME" ]; then
-        error "Binary not found or not executable"
-    fi
-    
-    if ! "$BIN_DIR/$BINARY_NAME" --version >/dev/null 2>&1; then
-        warn "Binary may not support --version flag, but it exists"
-    fi
-    
-    success "Installation verified"
-}
 
-# Cleanup
-cleanup() {
-    if [ -n "${temp_dir:-}" ] && [ -d "$temp_dir" ]; then
-        rm -rf "$temp_dir"
-    fi
-}
 
-# Main installation
+# ---------- Main ----------
 main() {
-    show_banner
-    
-    trap cleanup EXIT
-    
-    info "Starting TypeGen installation..."
-    echo ""
-    
-    check_root
-    check_dependencies
-    detect_system
-    get_version
-    
-    temp_dir=$(download_binary)
-    install_binary "$temp_dir"
-    create_directories
-    create_config
-    verify_installation
-    
-    echo ""
-    success "TypeGen installed successfully!"
-    echo ""
-    echo "  Binary location: $BIN_DIR/$BINARY_NAME"
-    echo "  Config location: $INSTALL_DIR/config/config.yaml"
-    echo "  Data directory:  $INSTALL_DIR/data"
-    echo ""
-    echo "Run '$BINARY_NAME --help' to get started"
-    echo ""
+  check_bash
+  require_root
+
+  require_cmd curl
+  require_cmd tar
+  require_cmd install
+
+  detect_system
+
+  info "Resolving version"
+  VERSION="$(resolve_version)"
+  [[ -n "$VERSION" ]] || error "Failed to resolve version"
+
+  info "Installing ${CTL_NAME} v${VERSION}"
+
+  URL="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${VERSION}/${TEMP_CTL_NAME}-${OS}-${ARCH}.tar.gz"
+
+  TMP_DIR="$(mktemp -d)"
+  trap 'rm -rf "$TMP_DIR"' EXIT
+
+  info "Downloading binary"
+  run_with_spinner curl -fL "$URL" -o "$TMP_DIR/pkg.tar.gz"
+
+  info "Extracting archive"
+  run_with_spinner tar -xzf "$TMP_DIR/pkg.tar.gz" -C "$TMP_DIR"
+
+  info "Locating binary in archive"
+
+  BIN="$(find_binary "$TMP_DIR")" || {
+    error "Failed to locate binary in archive. Contents were: $(find "$TMP_DIR" -type f)"
+  }
+
+  chmod +x "$BIN"
+
+  info "Installing binary to $BIN_DIR"
+  install -m 755 "$BIN" "$BIN_DIR/$CTL_NAME"
+
+  create_directories
+
+  echo ""
+  success "Installation complete !!"
+  success "Binary: $BIN_DIR/$CTL_NAME"
+  success "App home: $APP_HOME"
 }
 
-# Run main function
-main
+main "$@"
