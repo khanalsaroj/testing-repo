@@ -7,8 +7,7 @@ set -euo pipefail
 
 # ---------- Core Identity ----------
 APP_NAME="typegen"
-CTL_NAME="typegencli"
-TEMP_CTL_NAME="projectnamectl"
+CTL_NAME="typegenctl"
 GITHUB_ORG="khanalsaroj"
 CTL_REPO="typegencli"
 
@@ -20,7 +19,22 @@ CONFIG_DIR="$APP_HOME/config"
 DATA_DIR="$APP_HOME/data"
 LOG_DIR="$APP_HOME/logs"
 
-DEFAULT_CONFIG_FILE="$CONFIG_DIR/config.yaml"
+
+# -------- ASCII Art & Branding --------
+show_banner() {
+  cat <<"CONFIGEOF"
+
+  ████████╗██╗   ██╗██████╗ ███████╗ ██████╗ ███████╗███╗   ██╗
+  ╚══██╔══╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔════╝ ██╔════╝████╗  ██╗
+     ██║    ╚████╔╝ ██████╔╝█████╗  ██║  ███╗█████╗  ██╔██╗ ██║
+     ██║     ╚██╔╝  ██╔═══╝ ██╔══╝  ██║   ██║██╔══╝  ██║╚██╗██║
+     ██║      ██║   ██║     ███████╗╚██████╔╝███████╗██║ ╚████║
+     ╚═╝      ╚═╝   ╚═╝     ╚══════╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝
+
+     🌟 Installation System | v1.0.0 🌟
+
+CONFIGEOF
+}
 
 # ---------- Versioning ----------
 DEFAULT_VERSION="latest"
@@ -145,6 +159,7 @@ find_binary() {
 
 # ---------- Main ----------
 main() {
+  show_banner
   check_bash
   require_root
 
@@ -160,7 +175,7 @@ main() {
 
   info "Installing ${CTL_NAME} v${VERSION}"
 
-  URL="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${VERSION}/${TEMP_CTL_NAME}-${OS}-${ARCH}.tar.gz"
+  URL="https://github.com/${GITHUB_ORG}/${CTL_REPO}/releases/download/v${VERSION}/${CTL_NAME}-${OS}-${ARCH}.tar.gz"
 
   TMP_DIR="$(mktemp -d)"
   trap 'rm -rf "$TMP_DIR"' EXIT
@@ -184,8 +199,6 @@ main() {
 
   create_directories
 
-  echo ""
-  success "Installation complete !!"
   success "Binary: $BIN_DIR/$CTL_NAME"
   success "App home: $APP_HOME"
 
@@ -198,6 +211,8 @@ main() {
       echo ""
       error "Installation failed or $CTL_NAME is not in your PATH"
   fi
+
+  echo "✨ TypeGen Installation Complete! ✨"
 
 }
 
