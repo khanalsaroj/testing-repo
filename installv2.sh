@@ -188,6 +188,17 @@ main() {
   success "Installation complete !!"
   success "Binary: $BIN_DIR/$CTL_NAME"
   success "App home: $APP_HOME"
+
+  # Check if typegenctl is working
+  if command -v "$CTL_NAME" >/dev/null 2>&1; then
+      echo ""
+      success "Checking installed version..."
+      $CTL_NAME --version
+  else
+      echo ""
+      error "Installation failed or $CTL_NAME is not in your PATH"
+  fi
+
 }
 
 main "$@"
