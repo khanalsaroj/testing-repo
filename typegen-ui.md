@@ -1,0 +1,102 @@
+# TypeGen Dashboard
+
+<p align="center">
+  <img src="docs/assets/logo.jpg" width="100" height="100" alt="TypeGen Logo" />
+</p>
+
+<p align="center">
+  <strong>Web interface for managing TypeGen workflows</strong><br/>
+  Visual • Intuitive • Developer-focused
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/react-18+-61DAFB?logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/typescript-5+-3178C6?logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/vite-powered-646CFF?logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+  <img src="https://img.shields.io/badge/status-production--ready-success" />
+</p>
+
+---
+
+### **TypeGen Dashboard (`typegen-dashboard`)**
+
+The **TypeGen Dashboard** is a web-based interface that provides a visual workflow for managing database connections,
+exploring schemas, configuring generation options, and previewing generated output. It is designed to improve the
+developer
+experience by offering an intuitive UI on top of the TypeGen platform.
+
+> **Important:**
+> The Dashboard is **not a standalone application** and should **not be deployed independently**.
+> It is provisioned, configured, and controlled by **TypeGenCLI**, which coordinates its integration with the TypeGen
+> API and manages its runtime lifecycle.
+
+| How to use  | Description                                                            |
+| :---------- | :--------------------------------------------------------------------- |
+| TypeGenCLI  | [TypeGenCLI GitHub](https://github.com/khanalsaroj/typegen-ctl)        |
+| TypeGen-api | [TypeGen-Dashboard GitHub](https://github.com/khanalsaroj/typegen-api) |
+
+## Features
+
+- **Dashboard**: Overview of your type generation activities.
+- **Connection Management**: Easily configure and manage database connections.
+- **Type Generator**: Visual interface to select tables and generate TypeScript/other language types.
+- **Mapper**: Data structure mapping tools.
+- **Responsive Design**: Built with Tailwind CSS and Shadcn UI for a seamless experience across devices.
+
+## ️🖼️ Usage Demo & Screenshots
+
+### Screenshots
+
+|                                                                          |                                                                        |                                                                |
+| :----------------------------------------------------------------------: | :--------------------------------------------------------------------: | :------------------------------------------------------------: |
+|                              **Dashboard**                               |                           **Add Connection**                           |                      **Connection View**                       |
+| [![1](docs/assets/dashboard_light.png)](docs/assets/dashboard_light.png) | [![2](docs/assets/add_connection.png)](docs/assets/add_connection.png) | [![3](docs/assets/connection.png)](docs/assets/connection.png) |
+|                         _Light theme dashboard_                          |                           _Add new database_                           |                       _Database details_                       |
+
+|                           **Type Generator**                           |                          **Java Options**                          |                     **TypeScript Options**                     |
+| :--------------------------------------------------------------------: | :----------------------------------------------------------------: | :------------------------------------------------------------: |
+| [![4](docs/assets/type_generator.png)](docs/assets/type_generator.png) | [![5](docs/assets/options-java.png)](docs/assets/options-java.png) | [![6](docs/assets/options-ts.png)](docs/assets/options-ts.png) |
+|                            _Generate types_                            |                          _Java settings_                           |                     _TypeScript settings_                      |
+
+|                         **Zod Options**                          |                            **Mapper Generator**                            |                       **Settings**                       |
+| :--------------------------------------------------------------: | :------------------------------------------------------------------------: | :------------------------------------------------------: |
+| [![7](docs/assets/options-zod.png)](docs/assets/options-zod.png) | [![8](docs/assets/mapper_generator.png)](docs/assets/mapper_generator.png) | [![9](docs/assets/setting.png)](docs/assets/setting.png) |
+|                          _Zod settings_                          |                               _Data mappers_                               |                      _App settings_                      |
+
+### Usage Demo
+
+<p align="center">
+  <img src="docs/assets/demo-typegen.gif" width="100%"  alt="1"/>
+</p>
+
+## 🐳 Docker Image
+
+Pre-built Docker images are available for this project and can be pulled from the registry:
+
+```bash
+docker pull ghcr.io/khanalsaroj/typegen-dashboard:latest
+```
+
+## 📂 Project Structure
+
+```text
+typegen-dashboard/
+├── public/          # Static assets
+├── src/
+│   ├── components/  # Reusable UI components (common, generator, ui)
+│   ├── hooks/       # Custom React hooks
+│   ├── pages/       # Page components (Dashboard, Generator, Mapper, etc.)
+│   ├── services/    # API clients and data services
+│   ├── types/       # TypeScript type definitions
+│   ├── App.tsx      # Root component
+│   └── main.tsx     # Entry point
+├── index.html       # HTML template
+├── tailwind.config.ts # Tailwind CSS configuration
+└── vite.config.ts   # Vite configuration
+```
+
+### 🔍 Contact
+
+- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegenctl/issues)
+- **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
