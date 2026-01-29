@@ -18,7 +18,7 @@
 
 ---
 
-### **Typegen Server**
+## 🗄️  **Typegen Server**
 
 The **Typegen Server** is the core backend service of the Typegen platform. It is responsible for database schema
 introspection, validation, and deterministic code generation across supported languages and styles. The API exposes
@@ -55,7 +55,7 @@ Pre-built Docker images are available for this project and can be pulled from th
 docker pull ghcr.io/khanalsaroj/typegen-server:latest
 ```
 
-### 📂 Project Structure
+## 📂 Project Structure
 
 ```text
 ├── cmd/
@@ -256,7 +256,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 🔍 Contact
+## 🔍 Contact
 
 - **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)

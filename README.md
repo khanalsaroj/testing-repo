@@ -18,7 +18,7 @@
 
 ---
 
-### **Typegen UI**
+## 💻 **Typegen UI**
 
 The **Typegen UI** is a web-based interface that provides a visual workflow for managing database connections,
 exploring schemas, configuring generation options, and previewing generated output. It is designed to improve the
@@ -46,7 +46,7 @@ experience by offering an intuitive UI on top of the Typegen platform.
 
 ## ️🖼️ Usage Demo & Screenshots
 
-### Screenshots
+### 1. Screenshots
 
 |                                                                          |                                                                        |                                                                |
 |:------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------:|
@@ -64,7 +64,7 @@ experience by offering an intuitive UI on top of the Typegen platform.
 | [![7](docs/assets/options-zod.png)](docs/assets/options-zod.png) | [![8](docs/assets/mapper_generator.png)](docs/assets/mapper_generator.png) | [![9](docs/assets/setting.png)](docs/assets/setting.png) |
 |                          _Zod settings_                          |                               _Data mappers_                               |                      _App settings_                      |
 
-### Usage Demo
+### 2. Usage Demo
 
 <p align="center">
   <img src="docs/assets/demo-typegen.gif" width="100%"  alt="1"/>
@@ -96,7 +96,7 @@ typegen-ui/
 └── vite.config.ts   # Vite configuration
 ```
 
-### 🔍 Contact
+## 🔍 Contact
 
 - **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
