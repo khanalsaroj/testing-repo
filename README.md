@@ -81,7 +81,7 @@ docker pull ghcr.io/khanalsaroj/typegen-dashboard:latest
 ## 📂 Project Structure
 
 ```text
-typegen-dashboard/
+typegen-ui/
 ├── public/          # Static assets
 ├── src/
 │   ├── components/  # Reusable UI components (common, generator, ui)
