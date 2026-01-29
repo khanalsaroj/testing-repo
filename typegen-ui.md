@@ -14,7 +14,6 @@
   <img src="https://img.shields.io/badge/typescript-5+-3178C6?logo=typescript&logoColor=white" />
   <img src="https://img.shields.io/badge/vite-powered-646CFF?logo=vite&logoColor=white" />
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" />
-  <img src="https://img.shields.io/badge/status-production--ready-success" />
 </p>
 
 ---
