@@ -18,7 +18,7 @@
 
 ---
 
-### **Typegen CLI**
+### 🤖 **Typegen CLI**
 
 **TypegenCLI** (`typegenctl`) is the control plane of the Typegen platform. It is a statically compiled, single-binary
 CLI written in Go that orchestrates the lifecycle of Typegen services (Server and UI) using Docker.
@@ -61,7 +61,7 @@ The user interface layer.
 
 ---
 
-## System Architecture
+## 🧭 System Architecture
 
 ### 1. Control Flow
 
@@ -245,7 +245,7 @@ Available for most commands:
 
 ---
 
-### ♻️ Planned Enhancements
+## ♻️ Planned Enhancements
 
 ### 1. Platform & Language Support
 
@@ -272,14 +272,14 @@ Available for most commands:
     * Aggregate all defined servers from those files
     * Execute generation across **all detected services** in a single run
 
-### 🔍 Contact
+## 🔍 Contact
 
 - **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
 
 ---
 
-### Personal Note
+## Personal Note
 
 > Typegen — boring by design, reliable by default.
 >
