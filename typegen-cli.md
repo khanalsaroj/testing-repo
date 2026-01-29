@@ -18,7 +18,7 @@
 
 ---
 
-### **TypeGen CLI**
+### ** TypeGen CLI**
 
 **TypeGenCLI** (`typegenctl`) is the control plane of the Typegen platform. It is a statically compiled, single-binary
 CLI written in Go that orchestrates the lifecycle of Typegen services (Server and UI) using Docker.

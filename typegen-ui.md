@@ -19,7 +19,7 @@
 
 ---
 
-### **Typegen UI **
+### ** Typegen UI **
 
 The **Typegen UI** is a web-based interface that provides a visual workflow for managing database connections,
 exploring schemas, configuring generation options, and previewing generated output. It is designed to improve the
