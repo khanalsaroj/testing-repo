@@ -28,7 +28,7 @@ experience by offering an intuitive UI on top of the Typegen platform.
 > **Important:**
 > The UI is **not a standalone application** and should **not be deployed independently**.
 > It is provisioned, configured, and controlled by **Typegen CLI**, which coordinates its integration with the Typegen
-> API and manages its runtime lifecycle.
+> Server and manages its runtime lifecycle.
 
 | How to use     | Description                                                                           |
 |:---------------|:--------------------------------------------------------------------------------------|
@@ -75,7 +75,7 @@ experience by offering an intuitive UI on top of the Typegen platform.
 Pre-built Docker images are available for this project and can be pulled from the registry:
 
 ```bash
-docker pull ghcr.io/khanalsaroj/typegen-dashboard:latest
+docker pull ghcr.io/khanalsaroj/typegen-ui:latest
 ```
 
 ## 📂 Project Structure

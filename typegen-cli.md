@@ -87,8 +87,8 @@ The user interface layer.
 
 %% Managed Services
     subgraph Services["Managed Services"]
-        API[Typegen API]
-        Dashboard[Typegen Dashboard]
+        API[Typegen Server]
+        Dashboard[Typegen UI]
     end
 
     User --> CLI
@@ -117,8 +117,8 @@ sequenceDiagram
     participant PLAN as Planner
     participant STATE as State Store
     participant RT as Runtime (Docker)
-    participant UI as Typegen Dashboard
-    participant API as Typegen API
+    participant UI as Typegen UI
+    participant API as Typegen Server
 %% Bootstrap Phase (Control Plane)
     U ->> CLI: typegenctl init
     CLI ->> CFG: Create typegen.yaml
