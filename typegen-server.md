@@ -18,7 +18,7 @@
 
 ---
 
-### ** Typegen Server **
+### **Typegen Server**
 
 The **Typegen Server** is the core backend service of the Typegen platform. It is responsible for database schema
 introspection, validation, and deterministic code generation across supported languages and styles. The API exposes
