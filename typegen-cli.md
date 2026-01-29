@@ -283,9 +283,9 @@ Available for most commands:
 
 > Typegen — boring by design, reliable by default.
 >
-> After four years of writing Java, I decided to step outside looking for something new. This project was
-> built in Go, with zero prior experience and a healthy amount of confusion.
+> After four years of writing Java, I decided to step outside looking for something new.
+> This project was built in Go, with zero prior experience and a healthy amount of confusion.
 >
-> Would I do it again? Probably.
+> Would I do it again? Maybe. Probably.
 >
 > Thanks, Caffeine and LLMs. It is what it is.
