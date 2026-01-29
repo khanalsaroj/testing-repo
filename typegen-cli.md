@@ -274,7 +274,7 @@ Available for most commands:
 
 ### 🔍 Contact
 
-- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegenc-cli/issues)
+- **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
 
 ---

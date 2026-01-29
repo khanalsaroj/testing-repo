@@ -258,6 +258,6 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ### 🔍 Contact
 
-- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegen-cli/issues)
+- **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
 
