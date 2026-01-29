@@ -1,11 +1,11 @@
-# TypeGen API
+# Typegen API
 
 <p align="center">
-  <img src="docs/assets/logo.jpg" width="100" height="100" alt="TypeGen Logo" />
+  <img src="docs/assets/logo.jpg" width="100" height="100" alt="Typegen Logo" />
 </p>
 
 <p align="center">
-  <strong>Core code generation and schema engine for TypeGen</strong><br/>
+  <strong>Core code generation and schema engine for Typegen</strong><br/>
   Fast • Secure • Extensible
 </p>
 
@@ -18,23 +18,22 @@
 
 ---
 
-### **TypeGen API (`typegen-api`)**
+### **Typegen Server **
 
-The **TypeGen API** is the core backend service of the TypeGen platform. It is responsible for database schema
+The **Typegen Server** is the core backend service of the Typegen platform. It is responsible for database schema
 introspection, validation, and deterministic code generation across supported languages and styles. The API exposes
 generation capabilities used by the CLI and Dashboard while enforcing strict option schemas, security controls, and
 runtime validation.
 
 > **Important:**
-> The TypeGen API is **not intended to be run as a standalone service**.
-> Its lifecycle, configuration, and runtime environment are fully managed by **TypeGenCLI (`typegenctl`)**, which acts
-> as the control
-> plane for the entire TypeGen ecosystem.
+> The Typegen Server **can be run as a standalone service**, but the recommended best practice is to manage its
+> lifecycle, configuration, and runtime using **Typegen CLI (`typegenctl`)** and the **UI Dashboard**, which provide a
+> safer and more convenient control plane for the entire Typegen ecosystem.
 
-| How to use | Description                                                                  |
-|:-----------|:-----------------------------------------------------------------------------|
-| TypeGenCLI | [TypeGenCLI GitHub](https://github.com/khanalsaroj/typegenctl).              |
-| Dashboard  | [TypeGen-Dashboard GitHub](https://github.com/khanalsaroj/typegen-dashboard) |
+| How to use  | Description                                                                              |
+|:------------|:-----------------------------------------------------------------------------------------|
+| Typegen CLI | [TypegenCLI GitHub](https://github.com/khanalsaroj/typegen-cli?tab=readme-ov-file).      |
+| Typegen UI  | [Typegen-Dashboard GitHub](https://github.com/khanalsaroj/typegen-ui?tab=readme-ov-file) |
 
 ## ✨ Features
 
@@ -53,7 +52,7 @@ runtime validation.
 Pre-built Docker images are available for this project and can be pulled from the registry:
 
 ```bash
-docker pull ghcr.io/khanalsaroj/typegen-api:latest
+docker pull ghcr.io/khanalsaroj/typegen-server:latest
 ```
 
 ### 📂 Project Structure
@@ -185,8 +184,10 @@ docker pull ghcr.io/khanalsaroj/typegen-api:latest
 
 > **Note:**
 > The `options` object is dynamic.
-> Its available fields differ depending on the chosen `language` and `style`, as each combination exposes its own configuration options.
-> For the full list of supported options, see the documentation [here](https://github.com/khanalsaroj/typegen-dashboard).
+> Its available fields differ depending on the chosen `language` and `style`, as each combination exposes its own
+> configuration options.
+> For the full list of supported options, see the
+> documentation [here](https://github.com/khanalsaroj/typegen-dashboard).
 
 ```json
 {
@@ -257,6 +258,6 @@ docker pull ghcr.io/khanalsaroj/typegen-api:latest
 
 ### 🔍 Contact
 
-- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegenctl/issues)
+- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
 

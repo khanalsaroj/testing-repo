@@ -1,11 +1,11 @@
-# TypeGenCLI
+# Typegen CLI
 
 <p align="center">
   <img src="docs/assets/logo.jpg" width="100" height="100" alt="TypeGen Logo" />
 </p>
 
 <p align="center">
-  <strong>System controller for the TypeGen ecosystem</strong><br/>
+  <strong>System controller for the Typegen ecosystem</strong><br/>
   Deterministic • Safe • Production‑ready
 </p>
 
@@ -18,26 +18,26 @@
 
 ---
 
-### **TypeGen CLI (`typegen-cli`)**
+### **TypeGen CLI**
 
-**TypeGenCLI** (`typegenctl`) is the control plane of the TypeGen platform. It is a statically compiled, single-binary
-CLI written in Go that orchestrates the lifecycle of TypeGen services (API and Dashboard) using Docker.
+**TypeGenCLI** (`typegenctl`) is the control plane of the Typegen platform. It is a statically compiled, single-binary
+CLI written in Go that orchestrates the lifecycle of Typegen services (Server and UI) using Docker.
 
 It provides deterministic lifecycle management, configuration validation, runtime status inspection, and safe execution
 of operational workflows for both local development and production environments.
 
-The TypeGen platform is composed of **three first‑class components**, each with a clear and isolated responsibility:
+The Typegen platform is composed of **three first‑class components**, each with a clear and isolated responsibility:
 
-### 1. TypeGen CLI (`typegen-cli`)
+### 1. Typegen CLI
 
 The control plane of the platform.
 
 * Statically compiled, single‑binary CLI
-* Orchestrates the full TypeGen system lifecycle
+* Orchestrates the full Typegen system lifecycle
 * Validates configuration and runtime safety
 * Acts as the **only required entry point** for operators and developers
 
-### 2. TypeGen API (`typegen-api`)
+### 2. Typegen Server
 
 The core execution engine.
 
@@ -46,18 +46,18 @@ The core execution engine.
 * Exposes deterministic APIs for automation
 * Designed to be stateless and horizontally scalable
 
-📖 **Documentation:** [TypeGen API README](./typegen-api/README.md)
+📖 **Documentation:** [Typegen Server README](https://github.com/khanalsaroj/typegen-server?tab=readme-ov-file)
 
-### 3. TypeGen Dashboard (`typegen-dashboard`)
+### 3. Typegen UI
 
 The user interface layer.
 
 * Visual schema and project management
 * Service status and health visibility
 * Developer‑friendly workflows
-* Connects exclusively through the TypeGen API
+* Connects exclusively through the Typegen API
 
-📖 **Documentation:** [TypeGen Dashboard README](./typegen-dashboard/README.md)
+📖 **Documentation:** [Typegen UI README](https://github.com/khanalsaroj/typegen-ui?tab=readme-ov-file)
 
 ---
 
@@ -70,7 +70,7 @@ The user interface layer.
 %% Actors
     User[Developer / Operator]
 %% Control Plane
-    subgraph ControlPlane["TypeGen Control Plane"]
+    subgraph ControlPlane["Typegen Control Plane"]
         CLI[typegenctl]
         Config[typegen.yaml]
         Validator[Schema & Policy Validator]
@@ -87,8 +87,8 @@ The user interface layer.
 
 %% Managed Services
     subgraph Services["Managed Services"]
-        API[TypeGen API]
-        Dashboard[TypeGen Dashboard]
+        API[Typegen API]
+        Dashboard[Typegen Dashboard]
     end
 
     User --> CLI
@@ -117,8 +117,8 @@ sequenceDiagram
     participant PLAN as Planner
     participant STATE as State Store
     participant RT as Runtime (Docker)
-    participant UI as TypeGen Dashboard
-    participant API as TypeGen API
+    participant UI as Typegen Dashboard
+    participant API as Typegen API
 %% Bootstrap Phase (Control Plane)
     U ->> CLI: typegenctl init
     CLI ->> CFG: Create typegen.yaml
@@ -147,10 +147,10 @@ sequenceDiagram
 
 ```bash
 # Via install script (requires curl)
-curl -fsSL https://raw.githubusercontent.com/khanalsaroj/typegencli/refs/heads/main/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/khanalsaroj/typegen-cli/refs/heads/main/main/install.sh | sh
 ```
 
-Or download a prebuilt binary for your platform from the [Releases](https://github.com/sarojkhanal/typegenctl/releases)
+Or download a prebuilt binary for your platform from the [Releases](https://github.com/sarojkhanal/typegen-cli/releases)
 page.
 
 ---
@@ -160,7 +160,7 @@ page.
 ```bash
 typegenctl init                 # Generate default configuration (typegen.yaml)
 typegenctl pull                 # Pull required Docker images
-typegenctl run                  # Start the TypeGen service stack
+typegenctl run                  # Start the Typegen service stack
 typegenctl status               # Check health and status of services
 typegenctl dashboard            # Open the dashboard in your default browser
 ```
@@ -176,22 +176,22 @@ The CLI uses a `typegen.yaml` file for configuration. By default, it looks for t
 services:
   frontend:
     image:
-      name: ghcr.io/khanalsaroj/typegen-dashboard
+      name: ghcr.io/khanalsaroj/typegen-ui
       tag: latest
     container_name: Frontend
     port:
       host: 3000
-      container: 6379
+      container: 3000
     enabled: true
 
   backend:
     image:
-      name: ghcr.io/khanalsaroj/typegen-api
+      name: ghcr.io/khanalsaroj/typegen-server
       tag: latest
     container_name: Backend
     port:
       host: 8080
-      container: 6378
+      container: 8080
     enabled: true
 ```
 
@@ -204,14 +204,14 @@ services:
 | `init`      | Bootstrap the environment and generate `typegen.yaml`.               |
 | `check`     | Validate configuration, host prerequisites, and Docker availability. |
 | `pull`      | Fetch and verify required Docker images.                             |
-| `run`       | Start the TypeGen services (creates and starts containers).          |
-| `start`     | Start existing (but stopped) TypeGen containers.                     |
+| `run`       | Start the Typegen services (creates and starts containers).          |
+| `start`     | Start existing (but stopped) Typegen containers.                     |
 | `stop`      | Gracefully stop running containers without removing them.            |
 | `restart`   | Restart service containers.                                          |
 | `status`    | Inspect and report the current runtime state.                        |
 | `update`    | Pull the latest images for the services.                             |
 | `cleanup`   | Remove obsolete Docker images and stopped containers.                |
-| `dashboard` | Open the TypeGen dashboard in the browser.                           |
+| `dashboard` | Open the Typegen user interface (UI) in the browser.                 |
 
 ---
 
@@ -281,9 +281,9 @@ Available for most commands:
 
 ### Personal Note
 
-> TypeGen — boring by design, reliable by default.
+> Typegen — boring by design, reliable by default.
 >
-> After four years of writing Java, I decided to step outside my comfort zone and try something new. This project was
+> After four years of writing Java, I decided to step outside looking for something new. This project was
 > built in Go, with zero prior experience and a healthy amount of confusion.
 >
 > Would I do it again? Probably.

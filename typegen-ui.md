@@ -1,11 +1,11 @@
-# TypeGen Dashboard
+# Typegen UI
 
 <p align="center">
-  <img src="docs/assets/logo.jpg" width="100" height="100" alt="TypeGen Logo" />
+  <img src="docs/assets/logo.jpg" width="100" height="100" alt="Typegen Logo" />
 </p>
 
 <p align="center">
-  <strong>Web interface for managing TypeGen workflows</strong><br/>
+  <strong>Web interface for managing Typegen workflows</strong><br/>
   Visual • Intuitive • Developer-focused
 </p>
 
@@ -19,48 +19,49 @@
 
 ---
 
-### **TypeGen Dashboard (`typegen-dashboard`)**
+### **Typegen UI **
 
-The **TypeGen Dashboard** is a web-based interface that provides a visual workflow for managing database connections,
+The **Typegen UI** is a web-based interface that provides a visual workflow for managing database connections,
 exploring schemas, configuring generation options, and previewing generated output. It is designed to improve the
 developer
-experience by offering an intuitive UI on top of the TypeGen platform.
+experience by offering an intuitive UI on top of the Typegen platform.
 
 > **Important:**
-> The Dashboard is **not a standalone application** and should **not be deployed independently**.
-> It is provisioned, configured, and controlled by **TypeGenCLI**, which coordinates its integration with the TypeGen
+> The UI is **not a standalone application** and should **not be deployed independently**.
+> It is provisioned, configured, and controlled by **Typegen CLI**, which coordinates its integration with the Typegen
 > API and manages its runtime lifecycle.
 
-| How to use  | Description                                                            |
-| :---------- | :--------------------------------------------------------------------- |
-| TypeGenCLI  | [TypeGenCLI GitHub](https://github.com/khanalsaroj/typegen-ctl)        |
-| TypeGen-api | [TypeGen-Dashboard GitHub](https://github.com/khanalsaroj/typegen-api) |
+| How to use     | Description                                                                           |
+|:---------------|:--------------------------------------------------------------------------------------|
+| Typegen CLI    | [TypegenCLI GitHub](https://github.com/khanalsaroj/typegen-cli?tab=readme-ov-file)    |
+| Typegen Server | [Typegen-UI GitHub](https://github.com/khanalsaroj/typegen-server?tab=readme-ov-file) |
 
 ## Features
 
-- **Dashboard**: Overview of your type generation activities.
-- **Connection Management**: Easily configure and manage database connections.
+- **UI**: Overview of your type generation activities.
+- **Connection Management**: Configure and manage database connections.
 - **Type Generator**: Visual interface to select tables and generate TypeScript/other language types.
 - **Mapper**: Data structure mapping tools.
 - **Responsive Design**: Built with Tailwind CSS and Shadcn UI for a seamless experience across devices.
+- **Dark Mode**:
 
 ## ️🖼️ Usage Demo & Screenshots
 
 ### Screenshots
 
 |                                                                          |                                                                        |                                                                |
-| :----------------------------------------------------------------------: | :--------------------------------------------------------------------: | :------------------------------------------------------------: |
-|                              **Dashboard**                               |                           **Add Connection**                           |                      **Connection View**                       |
+|:------------------------------------------------------------------------:|:----------------------------------------------------------------------:|:--------------------------------------------------------------:|
+|                                  **UI**                                  |                           **Add Connection**                           |                      **Connection View**                       |
 | [![1](docs/assets/dashboard_light.png)](docs/assets/dashboard_light.png) | [![2](docs/assets/add_connection.png)](docs/assets/add_connection.png) | [![3](docs/assets/connection.png)](docs/assets/connection.png) |
 |                         _Light theme dashboard_                          |                           _Add new database_                           |                       _Database details_                       |
 
 |                           **Type Generator**                           |                          **Java Options**                          |                     **TypeScript Options**                     |
-| :--------------------------------------------------------------------: | :----------------------------------------------------------------: | :------------------------------------------------------------: |
+|:----------------------------------------------------------------------:|:------------------------------------------------------------------:|:--------------------------------------------------------------:|
 | [![4](docs/assets/type_generator.png)](docs/assets/type_generator.png) | [![5](docs/assets/options-java.png)](docs/assets/options-java.png) | [![6](docs/assets/options-ts.png)](docs/assets/options-ts.png) |
 |                            _Generate types_                            |                          _Java settings_                           |                     _TypeScript settings_                      |
 
 |                         **Zod Options**                          |                            **Mapper Generator**                            |                       **Settings**                       |
-| :--------------------------------------------------------------: | :------------------------------------------------------------------------: | :------------------------------------------------------: |
+|:----------------------------------------------------------------:|:--------------------------------------------------------------------------:|:--------------------------------------------------------:|
 | [![7](docs/assets/options-zod.png)](docs/assets/options-zod.png) | [![8](docs/assets/mapper_generator.png)](docs/assets/mapper_generator.png) | [![9](docs/assets/setting.png)](docs/assets/setting.png) |
 |                          _Zod settings_                          |                               _Data mappers_                               |                      _App settings_                      |
 
@@ -86,7 +87,7 @@ typegen-dashboard/
 ├── src/
 │   ├── components/  # Reusable UI components (common, generator, ui)
 │   ├── hooks/       # Custom React hooks
-│   ├── pages/       # Page components (Dashboard, Generator, Mapper, etc.)
+│   ├── pages/       # Page components (UI, Generator, Mapper, etc.)
 │   ├── services/    # API clients and data services
 │   ├── types/       # TypeScript type definitions
 │   ├── App.tsx      # Root component
@@ -98,5 +99,5 @@ typegen-dashboard/
 
 ### 🔍 Contact
 
-- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegenctl/issues)
+- **GitHub Issues:** [Report bugs and feature requests](https://github.com/sarojkhanal/typegen-cli/issues)
 - **Developer:** Khanal Saroj (waytosarojkhanal@gmail.com)
