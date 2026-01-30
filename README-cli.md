@@ -272,6 +272,12 @@ Available for most commands:
     * Aggregate all defined servers from those files
     * Execute generation across **all detected services** in a single run
 
+### 5. Testing
+
+* Test cases will be included starting from the next release
+* Coverage will include DTO generation, CLI behavior, and multi-service execution
+
+
 ## 🔍 Contact
 
 - **GitHub Issues:** [Report bugs and feature requests](https://github.com/khanalsaroj/typegen-cli/issues)
