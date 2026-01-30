@@ -32,7 +32,7 @@ runtime validation.
 
 | How to use  | Description                                                                              |
 |:------------|:-----------------------------------------------------------------------------------------|
-| Typegen CLI | [TypegenCLI GitHub](https://github.com/khanalsaroj/typegen-cli?tab=readme-ov-file).      |
+| Typegen CLI | [TypegenCLI GitHub](https://github.com/khanalsaroj/typegen-cli?tab=readme-ov-file)       |
 | Typegen UI  | [Typegen-Dashboard GitHub](https://github.com/khanalsaroj/typegen-ui?tab=readme-ov-file) |
 
 ## ✨ Features
