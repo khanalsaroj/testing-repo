@@ -64,6 +64,11 @@ experience by offering an intuitive UI on top of the Typegen platform.
 | [![7](docs/assets/options-zod.png)](docs/assets/options-zod.png) | [![8](docs/assets/mapper_generator.png)](docs/assets/mapper_generator.png) | [![9](docs/assets/setting.png)](docs/assets/setting.png) |
 |                          _Zod settings_                          |                               _Data mappers_                               |                      _App settings_                      |
 
+|                                **Record Options**                                 |
+|:---------------------------------------------------------------------------------:|
+| [![10](docs/assets/options-java-record.png)](docs/assets/options-java-record.png) |
+|                                 _Record settings_                                 |
+
 ### 2. Usage Demo
 
 <p align="center">
