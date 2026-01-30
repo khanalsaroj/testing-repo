@@ -146,7 +146,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 
 
-### 2. `POST /api/v1/connection` – Create a New DB Connection
+### 3. `POST /api/v1/connection` – Create a New DB Connection
 
 **Request Body Example:**
 
@@ -200,7 +200,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 3. `GET /api/v1/connection` – List All Connections
+### 4. `GET /api/v1/connection` – List All Connections
 
 **Response Example:**
 
@@ -234,7 +234,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 4. `POST /api/v1/type` – Generate Code Types
+### 5. `POST /api/v1/type` – Generate Code Types
 
 **Request Body Example:**
 
@@ -281,7 +281,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 5. `POST /api/v1/mapper` – Generate Mappers
+### 6. `POST /api/v1/mapper` – Generate Mappers
 
 **Request Body Example:**
 
