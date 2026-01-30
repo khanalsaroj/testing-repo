@@ -101,7 +101,7 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 2. `POST /api/v1/connections/test` – Create a New DB Connection
+### 2. `POST /api/v1/connection/test` – Test a DB Connection
 
 **Request Body Example:**
 
@@ -144,7 +144,63 @@ docker pull ghcr.io/khanalsaroj/typegen-server:latest
 
 ---
 
-### 3. `GET /api/v1/connections` – List All Connections
+
+
+### 2. `POST /api/v1/connection` – Create a New DB Connection
+
+**Request Body Example:**
+
+```json
+{
+  "dbType": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "admin",
+  "password": "securepassword",
+  "schemaName": "public",
+  "databaseName": "mydb"
+}
+```
+
+**Response Success Example:**
+
+```json
+{
+  "success": true,
+  "message": "User fetched successfully",
+  "connection": {
+    "dbType": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "admin",
+    "password": "securepassword",
+    "schemaName": "public",
+    "databaseName": "mydb"
+  }
+}
+```
+
+**HTTP Status:** `200 OK`
+
+---
+
+
+**Response Error Example:**
+
+```json
+{
+  "success": false,
+  "message": "Failed to create connection",
+  "error": "user not found"
+}
+
+```
+
+**HTTP Status:** `500 InternalServerError`
+
+---
+
+### 3. `GET /api/v1/connection` – List All Connections
 
 **Response Example:**
 
